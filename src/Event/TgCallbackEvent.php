@@ -5,65 +5,47 @@ namespace App\Event;
 
 use DateTime;
 use Symfony\Contracts\EventDispatcher\Event;
+use Telegram\Bot\Objects\Update;
+use Telegram\Bot\Objects\Update as UpdateObject;
 
 class TgCallbackEvent extends Event
 {
     public const NAME = 'tg.callback';
 
-    private int $updateId;
-    private array $message;
-    private DateTime $date;
+    private UpdateObject $updateObject;
 
-    public function __construct(array $data)
+
+    public function __construct(UpdateObject $updateObject)
     {
-        $this->updateId = (int)$data['update_id'] ?? null;
-        $this->message = $data['message'] ?? null;
-
-        $ts = $this->message['date'] ?? time();
-        $this->date = new DateTime('@' . $ts);
+        $this->updateObject = $updateObject;
     }
 
-    public function getUpdateId(): int
+    public function getUpdateObject(): UpdateObject
     {
-        return $this->updateId;
+        return $this->updateObject;
     }
 
-    public function getMessage(): array
-    {
-        return $this->message;
-    }
-
-    public function getDate(): DateTime
-    {
-        return $this->date;
-    }
-
-    public function getText(): string
-    {
-        return $this->message['text'] ?? '';
-    }
-
-    /**
-     * Get only command name
-     *
-     * @return string
-     */
-    public function getCommand(): string
-    {
-        $text = $this->getText();
-        if (!str_starts_with($text, '/')) return '';
-        $text = ltrim($text, '/');
-        $delimiterPos = strpos($text, ' ');
-        return $delimiterPos ? substr($text, 0, $delimiterPos) : $text;
-    }
-
-    /**
-     * Get text after command
-     *
-     * @return string
-     */
-    public function getTextAfterCommand(): string
-    {
-        return trim(strpbrk($this->getText(), ' '));
-    }
+//    /**
+//     * Get only command name
+//     *
+//     * @return string
+//     */
+//    public function getCommand(): string
+//    {
+//        $text = $this->getText();
+//        if (!str_starts_with($text, '/')) return '';
+//        $text         = ltrim($text, '/');
+//        $delimiterPos = strpos($text, ' ');
+//        return $delimiterPos ? substr($text, 0, $delimiterPos) : $text;
+//    }
+//
+//    /**
+//     * Get text after command
+//     *
+//     * @return string
+//     */
+//    public function getTextAfterCommand(): string
+//    {
+//        return trim(strpbrk($this->getText(), ' '));
+//    }
 }

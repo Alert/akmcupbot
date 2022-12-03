@@ -7,7 +7,7 @@ use App\Event\TgCallbackEvent;
 
 interface CommandListenerInterface
 {
-    public const COMMAND_NAME = null;
+    public const NAME = null;
 
     public function handler(TgCallbackEvent $e): void;
 }

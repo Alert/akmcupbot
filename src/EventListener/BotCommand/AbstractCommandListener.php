@@ -28,38 +28,38 @@ abstract class AbstractCommandListener implements CommandListenerInterface
         $this->devChatId = $cfg->get('tg.dev_chat_id');
     }
 
-    /**
-     * Check message data is a command
-     *
-     * @param TgCallbackEvent $e
-     * @return bool
-     */
-    protected function isCommand(TgCallbackEvent $e): bool
-    {
-        $entities = $e->getMessage()['entities'] ?? [];
-        $firstEntity = array_shift($entities);
-        $type = $firstEntity['type'] ?? '';
-
-        return $type === 'bot_command';
-    }
-
-    /**
-     * Match command name for different listener
-     *
-     * @param TgCallbackEvent $e
-     * @return bool
-     */
-    protected function commandNameMatching(TgCallbackEvent $e): bool
-    {
-        return $e->getCommand() === static::COMMAND_NAME;
-    }
-
-    public function handler(TgCallbackEvent $e): void
-    {
-        if (!$this->isCommand($e) || !$this->commandNameMatching($e)) return;
-
-        $this->action($e);
-    }
+//    /**
+//     * Check message data is a command
+//     *
+//     * @param TgCallbackEvent $e
+//     * @return bool
+//     */
+//    protected function isCommand(TgCallbackEvent $e): bool
+//    {
+//        $entities = $e->getMessage()['entities'] ?? [];
+//        $firstEntity = array_shift($entities);
+//        $type = $firstEntity['type'] ?? '';
+//
+//        return $type === 'bot_command';
+//    }
+//
+//    /**
+//     * Match command name for different listener
+//     *
+//     * @param TgCallbackEvent $e
+//     * @return bool
+//     */
+//    protected function commandNameMatching(TgCallbackEvent $e): bool
+//    {
+//        return $e->getCommand() === static::NAME;
+//    }
+//
+//    public function handler(TgCallbackEvent $e): void
+//    {
+//        if (!$this->isCommand($e) || !$this->commandNameMatching($e)) return;
+//
+//        $this->action($e);
+//    }
 
     /**
      * Send message wrapper

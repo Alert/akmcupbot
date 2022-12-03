@@ -8,10 +8,10 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
 #[AsEventListener(event: 'tg.callback', method: 'handler')]
-class WhereCommandListener extends AbstractCommandListener
+class StartCommandListener extends AbstractCommandListener
 {
-    public const NAME = 'where';
-    public const ALIAS = 'где';
+    public const NAME = 'start';
+    public const ALIAS = 'старт';
 
     public function handler(TgCallbackEvent $e): void
     {
@@ -28,12 +28,18 @@ class WhereCommandListener extends AbstractCommandListener
     {
         $msg          = $updateObject->getMessage();
         $senderChatId = $msg->chat->id;
+        $username     = $msg->from->firstName ?: $msg->from->username;
 
         $params = [
             'chat_id' => $senderChatId,
-            'text' => $this->translator->trans('where.response', [], 'tg_commands'),
+            'text' => $this->translator->trans(
+                'start.response',
+                ['%username%' => $username],
+                'tg_commands'
+            ),
             'parse_mode' => 'Markdown',
+            'disable_web_page_preview' => true,
         ];
-        $this->sendMessage($params, false, $senderChatId);
+        $this->sendMessage($params, true, $senderChatId);
     }
 }

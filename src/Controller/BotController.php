@@ -5,7 +5,6 @@ namespace App\Controller;
 
 use App\Event\TgCallbackEvent;
 use Borsaco\TelegramBotApiBundle\Service\Bot;
-use JsonException;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -17,13 +16,13 @@ use Telegram\Bot\Api;
 class BotController extends AbstractController
 {
     private Api $bot;
-    private LoggerInterface $botIncomeLogger;
+    private LoggerInterface $botLogger;
     private EventDispatcherInterface $dispatcher;
 
-    public function __construct(Bot $bot, LoggerInterface $botIncomeLogger, EventDispatcherInterface $dispatcher)
+    public function __construct(Bot $bot, LoggerInterface $botLogger, EventDispatcherInterface $dispatcher)
     {
-        $this->bot = $bot->getBot();
-        $this->botIncomeLogger = $botIncomeLogger;
+        $this->bot        = $bot->getBot();
+        $this->botLogger  = $botLogger;
         $this->dispatcher = $dispatcher;
     }
 
@@ -33,20 +32,14 @@ class BotController extends AbstractController
     #[Route('/callback/', name: 'callback')]
     public function callback(): Response
     {
-        try {
-            $raw = file_get_contents('php://input');
-            $data = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
-            $error = $e->getMessage();
-            $this->botIncomeLogger->error('Parse JSON error', compact('error', 'raw'));
-            return new Response();
-        }
+        $data = $this->bot->getWebhookUpdate();
 
-        $this->botIncomeLogger->info('Webhook data from TG', compact('data'));
+        $this->botLogger->info('Webhook receive data', compact('data'));
 
         $event = new TgCallbackEvent($data);
         $this->dispatcher->dispatch($event, TgCallbackEvent::NAME);
 
         return new Response();
     }
+
 }
