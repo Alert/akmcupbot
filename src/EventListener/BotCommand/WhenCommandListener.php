@@ -7,6 +7,7 @@ use App\Event\TgCallbackEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
+// TODO: delete
 #[AsEventListener(event: 'tg.callback', method: 'handler')]
 class WhenCommandListener extends AbstractCommandListener
 {
