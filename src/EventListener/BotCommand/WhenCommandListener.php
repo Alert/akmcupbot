@@ -55,9 +55,12 @@ class WhenCommandListener extends AbstractCommandListener
         $callback = $updateObject->callbackQuery;
 
         if ($callback->data === 'when.schedule') {
-            $this->sendMessage([
+            $this->bot->sendMediaGroup([
                 'chat_id' => $callback->message->chat->id,
-                'text' => 'информации ещё нет :(',
+                'media' => json_encode([
+                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBfmOSU0ZD_rgfzdrwObYufa00XHscAAL0xTEbCMWQSBjD6t7WKKHlAQADAgADeQADKwQ'],
+                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBf2OSU0a6Guse5J3H0cQBwCFRXVbTAAL1xTEbCMWQSAqb8IBoNlpjAQADAgADeQADKwQ'],
+                ]),
             ]);
             $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
         }
