@@ -42,8 +42,8 @@ class WhenCommandListener extends AbstractCommandListener
             'reply_markup' => json_encode([
                 'inline_keyboard' => [[
                     ['text' => 'Схема поля', 'callback_data' => 'when.field'],
-                    ['text' => 'Расписание', 'callback_data' => 'when.schedule'],
-                    ['text' => 'Заявка', 'url' => 'https://docs.google.com/forms/d/e/1FAIpQLSc3wgzDSgsTkGPwYPs1ZhWhifGUVSW0ID5d9LmeV19ZiYkQQA/viewform'],
+                    ['text' => '📝 Расписание', 'callback_data' => 'when.schedule'],
+//                    ['text' => 'Заявка', 'url' => 'https://docs.google.com/forms/d/e/1FAIpQLSc3wgzDSgsTkGPwYPs1ZhWhifGUVSW0ID5d9LmeV19ZiYkQQA/viewform'],
                 ]],
             ])];
 
@@ -58,8 +58,8 @@ class WhenCommandListener extends AbstractCommandListener
             $this->bot->sendMediaGroup([
                 'chat_id' => $callback->message->chat->id,
                 'media' => json_encode([
-                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBfmOSU0ZD_rgfzdrwObYufa00XHscAAL0xTEbCMWQSBjD6t7WKKHlAQADAgADeQADKwQ'],
-                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBf2OSU0a6Guse5J3H0cQBwCFRXVbTAAL1xTEbCMWQSAqb8IBoNlpjAQADAgADeQADKwQ'],
+                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBi2OUddkVbxl4YG4Yk8bm67XmfWRMAAL2wDEb9OGgSAKEh1h8Cj81AQADAgADeQADKwQ'],
+                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBjGOUddlR1T6ZsXo7uZz4-p8GRu0cAAL3wDEb9OGgSJHtN9GE-5b5AQADAgADeQADKwQ'],
                 ]),
             ]);
             $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);

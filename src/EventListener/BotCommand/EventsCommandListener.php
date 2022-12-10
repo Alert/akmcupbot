@@ -143,9 +143,9 @@ class EventsCommandListener extends AbstractCommandListener
             'text' => $this->translator->trans('events.response', [], 'tg_commands'),
             'reply_markup' => json_encode([
                 'inline_keyboard' => [
-                    [['text' => 'Схема поля', 'callback_data' => 'events.2.field'],['text' => 'Расписание', 'callback_data' => 'events.2.schedule']],
-//                    [['text' => 'Результаты', 'callback_data' => 'events.2.result']],
-                    [['text' => 'Заявка', 'url' => 'https://docs.google.com/forms/d/e/1FAIpQLSc3wgzDSgsTkGPwYPs1ZhWhifGUVSW0ID5d9LmeV19ZiYkQQA/viewform']],
+                    [['text' => 'Схема поля', 'callback_data' => 'events.2.field'],['text' => '📝 Расписание', 'callback_data' => 'events.2.schedule']],
+                    [['text' => 'Результаты', 'callback_data' => 'events.2.result']],
+//                    [['text' => 'Заявка', 'url' => 'https://docs.google.com/forms/d/e/1FAIpQLSc3wgzDSgsTkGPwYPs1ZhWhifGUVSW0ID5d9LmeV19ZiYkQQA/viewform']],
                     [['text' => '🔙 к списку этапов', 'callback_data' => 'events.back']]],
             ]),
         ]);
@@ -166,17 +166,19 @@ class EventsCommandListener extends AbstractCommandListener
         $this->bot->sendMediaGroup([
             'chat_id' => $callback->message->chat->id,
             'media' => json_encode([
-                ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBfmOSU0ZD_rgfzdrwObYufa00XHscAAL0xTEbCMWQSBjD6t7WKKHlAQADAgADeQADKwQ'],
-                ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBf2OSU0a6Guse5J3H0cQBwCFRXVbTAAL1xTEbCMWQSAqb8IBoNlpjAQADAgADeQADKwQ'],
+                ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBi2OUddkVbxl4YG4Yk8bm67XmfWRMAAL2wDEb9OGgSAKEh1h8Cj81AQADAgADeQADKwQ'],
+                ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBjGOUddlR1T6ZsXo7uZz4-p8GRu0cAAL3wDEb9OGgSJHtN9GE-5b5AQADAgADeQADKwQ'],
             ]),
         ]);
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
     }
     public function btnEvents2Result(CallbackQuery $callback){
-        $this->sendMessage([
+        $params = [
             'chat_id' => $callback->message->chat->id,
-            'text' => 'информации ещё нет :(',
-        ]);
+            'text' => str_replace('-', '\-', $this->translator->trans('events.2.result', [], 'tg_commands')),
+            'parse_mode' => 'MarkdownV2',
+        ];
+        $this->sendMessage($params, false, $callback->message->chat->id);
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
     }
 
