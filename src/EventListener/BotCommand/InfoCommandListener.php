@@ -33,10 +33,10 @@ class InfoCommandListener extends AbstractCommandListener
             'chat_id' => $senderChatId,
             'text' => $this->translator->trans(
                 'info.response',
-                ['%phone%' => $this->cfg->get('contacts.phone')],
+                ['%phone%' => $this->escapeString($this->cfg->get('contacts.phone'))],
                 'tg_commands'
             ),
-            'parse_mode' => 'Markdown',
+            'parse_mode' => 'MarkdownV2',
             'disable_web_page_preview' => true,
         ];
         $this->sendMessage($params, true, $senderChatId);

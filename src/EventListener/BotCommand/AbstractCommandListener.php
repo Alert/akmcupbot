@@ -21,11 +21,11 @@ abstract class AbstractCommandListener implements CommandListenerInterface
 
     public function __construct(Bot $bot, TranslatorInterface $translator, ContainerBagInterface $cfg)
     {
-        $this->bot = $bot->getBot();
+        $this->bot        = $bot->getBot();
         $this->translator = $translator;
-        $this->cfg = $cfg;
-        $this->isDevMode = $cfg->get('tg.dev_mode');
-        $this->devChatId = $cfg->get('tg.dev_chat_id');
+        $this->cfg        = $cfg;
+        $this->isDevMode  = $cfg->get('tg.dev_mode');
+        $this->devChatId  = $cfg->get('tg.dev_chat_id');
     }
 
 //    /**
@@ -86,6 +86,29 @@ abstract class AbstractCommandListener implements CommandListenerInterface
         }
 
         return $this->bot->sendMessage($params);
+    }
+
+    /**
+     * Escape char for MarkdownV2
+     *
+     * @param string $char
+     * @return string
+     */
+    protected function escapeChar(string $char): string
+    {
+        $num = ord($char);
+        return $num <= 126 ? '\\' . $char : $char;
+    }
+
+    /**
+     * Escape string for MarkdownV2
+     *
+     * @param string $string
+     * @return string
+     */
+    protected function escapeString(string $string): string
+    {
+        return implode('', array_map([$this, 'escapeChar'], str_split($string)));
     }
 
 }

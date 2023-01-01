@@ -43,7 +43,7 @@ class WhenCommandListener extends AbstractCommandListener
                 'inline_keyboard' => [[
                     ['text' => 'Схема поля', 'callback_data' => 'when.field'],
                     ['text' => '📝 Расписание', 'callback_data' => 'when.schedule'],
-//                    ['text' => 'Заявка', 'url' => 'https://docs.google.com/forms/d/e/1FAIpQLSc3wgzDSgsTkGPwYPs1ZhWhifGUVSW0ID5d9LmeV19ZiYkQQA/viewform'],
+                    ['text' => 'Заявка', 'url' => 'https://docs.google.com/forms/d/e/1FAIpQLSc3wgzDSgsTkGPwYPs1ZhWhifGUVSW0ID5d9LmeV19ZiYkQQA/viewform'],
                 ]],
             ])];
 
@@ -55,24 +55,34 @@ class WhenCommandListener extends AbstractCommandListener
         $callback = $updateObject->callbackQuery;
 
         if ($callback->data === 'when.schedule') {
-            $this->bot->sendMediaGroup([
+//            $this->bot->sendMediaGroup([
+//                'chat_id' => $callback->message->chat->id,
+//                'media' => json_encode([
+//                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBi2OUddkVbxl4YG4Yk8bm67XmfWRMAAL2wDEb9OGgSAKEh1h8Cj81AQADAgADeQADKwQ'],
+//                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBjGOUddlR1T6ZsXo7uZz4-p8GRu0cAAL3wDEb9OGgSJHtN9GE-5b5AQADAgADeQADKwQ'],
+//                ]),
+//            ]);
+//            $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
+            $this->sendMessage([
                 'chat_id' => $callback->message->chat->id,
-                'media' => json_encode([
-                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBi2OUddkVbxl4YG4Yk8bm67XmfWRMAAL2wDEb9OGgSAKEh1h8Cj81AQADAgADeQADKwQ'],
-                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBjGOUddlR1T6ZsXo7uZz4-p8GRu0cAAL3wDEb9OGgSJHtN9GE-5b5AQADAgADeQADKwQ'],
-                ]),
+                'text' => 'информации ещё нет :(',
             ]);
             $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
         }
 
         if ($callback->data === 'when.field') {
-            $this->bot->sendMediaGroup([
+//            $this->bot->sendMediaGroup([
+//                'chat_id' => $callback->message->chat->id,
+//                'media' => json_encode([
+//                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAN4Y4j8zvkU36ikwl_DKaodymfwIEEAAlbEMRtVOUlIBrchlFbJztgBAAMCAANzAAMrBA'],
+//                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAN5Y4j8zvHal_3u9WSv4dU1EkMV4eAAAlfEMRtVOUlIHecXVwcycLsBAAMCAANzAAMrBA'],
+//                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAN6Y4j8ztGotZcDBfcxpkfKlKv-LBEAAljEMRtVOUlIBWXOM4KaZ9UBAAMCAAN5AAMrBA'],
+//                ]),
+//            ]);
+//            $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
+            $this->sendMessage([
                 'chat_id' => $callback->message->chat->id,
-                'media' => json_encode([
-                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAN4Y4j8zvkU36ikwl_DKaodymfwIEEAAlbEMRtVOUlIBrchlFbJztgBAAMCAANzAAMrBA'],
-                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAN5Y4j8zvHal_3u9WSv4dU1EkMV4eAAAlfEMRtVOUlIHecXVwcycLsBAAMCAANzAAMrBA'],
-                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAN6Y4j8ztGotZcDBfcxpkfKlKv-LBEAAljEMRtVOUlIBWXOM4KaZ9UBAAMCAAN5AAMrBA'],
-                ]),
+                'text' => 'информации ещё нет :(',
             ]);
             $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
         }
