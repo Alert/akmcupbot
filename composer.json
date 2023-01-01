@@ -8,6 +8,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "borsaco/telegram-bot-api-bundle": "^1.1",
+        "nesbot/carbon": "^2.64",
         "symfony/console": "6.1.*",
         "symfony/dotenv": "6.1.*",
         "symfony/event-dispatcher": "6.1.*",
