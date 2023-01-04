@@ -76,11 +76,13 @@ class EventsCommandListener extends AbstractCommandListener
         if ($callback->data === 'events.1') $this->btnEvents1($callback);
         if ($callback->data === 'events.1.field') $this->btnEvents1Field($callback);
         if ($callback->data === 'events.1.schedule') $this->btnEvents1Schedule($callback);
+        if ($callback->data === 'events.1.broadcast') $this->btnEvents1Broadcast($callback);
         if ($callback->data === 'events.1.result') $this->btnEvents1Result($callback);
 
         if ($callback->data === 'events.2') $this->btnEvents2($callback);
         if ($callback->data === 'events.2.field') $this->btnEvents2Field($callback);
         if ($callback->data === 'events.2.schedule') $this->btnEvents2Schedule($callback);
+        if ($callback->data === 'events.2.broadcast') $this->btnEvents2Broadcast($callback);
         if ($callback->data === 'events.2.result') $this->btnEvents2Result($callback);
 
         if ($callback->data === 'events.3') $this->btnEvents3($callback);
@@ -96,7 +98,7 @@ class EventsCommandListener extends AbstractCommandListener
             'reply_markup' => json_encode([
                 'inline_keyboard' => [
                     [['text' => 'Схема поля', 'callback_data' => 'events.1.field'],['text' => 'Расписание', 'callback_data' => 'events.1.schedule']],
-                    [['text' => 'Результаты', 'callback_data' => 'events.1.result']],
+                    [['text' => 'Результаты', 'callback_data' => 'events.1.result'],['text' => 'Записи игр', 'callback_data' => 'events.1.video']],
                     [['text' => '🔙 к списку этапов', 'callback_data' => 'events.back']]],
             ]),
         ]);
@@ -126,6 +128,26 @@ class EventsCommandListener extends AbstractCommandListener
         ]);
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
     }
+    public function btnEvents1Broadcast(CallbackQuery $callback){
+        $this->bot->editMessageText([
+            'chat_id' => $callback->message->chat->id,
+            'message_id' => $callback->message->messageId,
+            'text' => $this->translator->trans('events.broadcast', [], 'tg_commands'),
+            'reply_markup' => json_encode([
+                'inline_keyboard' => [
+                    [
+                        ['text' => '1️⃣ Дивизион', 'url' => 'https://vk.com/video-215238258_456239019'],
+                        ['text' => '2️⃣ Дивизион', 'url' => 'https://vk.com/video-215238258_456239026'],
+                    ],
+                    [
+                        ['text' => '3️⃣ Дивизион', 'url' => 'https://vk.com/video-215238258_456239022'],
+                        ['text' => '4️⃣ Дивизион', 'url' => 'https://vk.com/video-215238258_456239032'],
+                    ],
+                    [['text' => '🔙 к списку этапов', 'callback_data' => 'events.back']]],
+            ]),
+        ]);
+        $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
+    }
     public function btnEvents1Result(CallbackQuery $callback){
         $params = [
             'chat_id' => $callback->message->chat->id,
@@ -144,7 +166,7 @@ class EventsCommandListener extends AbstractCommandListener
             'reply_markup' => json_encode([
                 'inline_keyboard' => [
                     [['text' => 'Схема поля', 'callback_data' => 'events.2.field'],['text' => '📝 Расписание', 'callback_data' => 'events.2.schedule']],
-                    [['text' => 'Результаты', 'callback_data' => 'events.2.result']],
+                    [['text' => 'Результаты', 'callback_data' => 'events.2.result'],['text' => 'Записи игр', 'callback_data' => 'events.2.broadcast']],
 //                    [['text' => 'Заявка', 'url' => 'https://docs.google.com/forms/d/e/1FAIpQLSc3wgzDSgsTkGPwYPs1ZhWhifGUVSW0ID5d9LmeV19ZiYkQQA/viewform']],
                     [['text' => '🔙 к списку этапов', 'callback_data' => 'events.back']]],
             ]),
@@ -168,6 +190,26 @@ class EventsCommandListener extends AbstractCommandListener
             'media' => json_encode([
                 ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBi2OUddkVbxl4YG4Yk8bm67XmfWRMAAL2wDEb9OGgSAKEh1h8Cj81AQADAgADeQADKwQ'],
                 ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBjGOUddlR1T6ZsXo7uZz4-p8GRu0cAAL3wDEb9OGgSJHtN9GE-5b5AQADAgADeQADKwQ'],
+            ]),
+        ]);
+        $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
+    }
+    public function btnEvents2Broadcast(CallbackQuery $callback){
+        $this->bot->editMessageText([
+            'chat_id' => $callback->message->chat->id,
+            'message_id' => $callback->message->messageId,
+            'text' => $this->translator->trans('events.broadcast', [], 'tg_commands'),
+            'reply_markup' => json_encode([
+                'inline_keyboard' => [
+                    [
+                        ['text' => '1️⃣ Дивизион', 'url' => 'https://vk.com/video-215238258_456239036'],
+                        ['text' => '2️⃣ Дивизион', 'url' => 'https://vk.com/video-215238258_456239041'],
+                    ],
+                    [
+                        ['text' => '3️⃣ Дивизион', 'url' => 'https://vk.com/video-215238258_456239038'],
+                        ['text' => '4️⃣ Дивизион', 'url' => 'https://vk.com/video-215238258_456239045'],
+                    ],
+                    [['text' => '🔙 к списку этапов', 'callback_data' => 'events.back']]],
             ]),
         ]);
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);

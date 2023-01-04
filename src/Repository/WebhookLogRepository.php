@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\WebhookLogEntity;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -40,7 +41,22 @@ class WebhookLogRepository extends ServiceEntityRepository
         }
     }
 
-    public function savePlainSql(DateTime $ts, string $username, string $firstName, string $lastName, string $raw)
+    /**
+     * Save to db without ORM
+     *
+     * @param DateTime $ts
+     * @param string|null $username
+     * @param string|null $firstName
+     * @param string|null $lastName
+     * @param string $raw
+     * @return void
+     * @throws Exception
+     */
+    public function savePlainSql(DateTime    $ts,
+                                 string|null $username,
+                                 string|null $firstName,
+                                 string|null $lastName,
+                                 string      $raw): void
     {
         $ts = $ts->format('Y-m-d H:i:s.u');
 
@@ -48,6 +64,6 @@ class WebhookLogRepository extends ServiceEntityRepository
         $stmt = $conn->prepare('
             INSERT INTO webhook_log (ts, username, first_name, last_name, raw) VALUES (?, ?, ?, ?, ?)
         ');
-        $stmt->executeStatement([$ts, $username, $firstName, $lastName, $raw]);
+        $stmt->executeStatement([$ts, (string)$username, (string)$firstName, (string)$lastName, $raw]);
     }
 }
