@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\EventListener\BotCommand;
 
 use App\Event\TgCallbackEvent;
+use App\Repository\EventEntityRepository;
 use Borsaco\TelegramBotApiBundle\Service\Bot;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -18,14 +19,19 @@ abstract class AbstractCommandListener implements CommandListenerInterface
     protected ContainerBagInterface $cfg;
     protected bool $isDevMode;
     protected int $devChatId;
+    protected EventEntityRepository $eventRepo;
 
-    public function __construct(Bot $bot, TranslatorInterface $translator, ContainerBagInterface $cfg)
+    public function __construct(Bot                   $bot,
+                                TranslatorInterface   $translator,
+                                ContainerBagInterface $cfg,
+                                EventEntityRepository $eventRepo)
     {
         $this->bot        = $bot->getBot();
         $this->translator = $translator;
         $this->cfg        = $cfg;
         $this->isDevMode  = $cfg->get('tg.dev_mode');
         $this->devChatId  = $cfg->get('tg.dev_chat_id');
+        $this->eventRepo  = $eventRepo;
     }
 
 //    /**

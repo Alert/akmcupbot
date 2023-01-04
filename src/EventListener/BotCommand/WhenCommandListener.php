@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace App\EventListener\BotCommand;
 
 use App\Event\TgCallbackEvent;
+use Carbon\Carbon;
+use DateTime;
+use DateTimeInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
@@ -34,10 +37,24 @@ class WhenCommandListener extends AbstractCommandListener
         $msg          = $updateObject->getMessage();
         $senderChatId = $msg->chat->id;
 
+        $event = $this->eventRepo->findOneUncompleted();
+
+        if (!$event) {
+            $text = $this->translator->trans('no_info', [], 'common');
+            $this->sendMessage(['chat_id' => $senderChatId, 'text' => $text], false, $senderChatId);
+            return;
+        }
+
+        $text = $this->translator->trans('when.response', [
+            '%num%' => $event->getNum(),
+            '%readable_dates%' => $this->escapeString($event->getReadableDates()),
+            '%days_count_down%' => $this->escapeString($this->getDaysCountDownText($event->getDateStart())),
+        ], 'tg_commands');
+
         $params = [
             'chat_id' => $senderChatId,
-            'text' => $this->translator->trans('when.response', [], 'tg_commands'),
-            'parse_mode' => 'Markdown',
+            'text' => $text,
+            'parse_mode' => 'MarkdownV2',
             'disable_web_page_preview' => true,
             'reply_markup' => json_encode([
                 'inline_keyboard' => [[
@@ -48,6 +65,19 @@ class WhenCommandListener extends AbstractCommandListener
             ])];
 
         $this->sendMessage($params, false, $senderChatId);
+    }
+
+    /**
+     * Get count down days text
+     *
+     * @param DateTimeInterface $date
+     * @return string
+     */
+    private function getDaysCountDownText(DateTimeInterface $date): string
+    {
+        $diffDays = $date < Carbon::now() ? 0 : Carbon::now()->diffInDays($date);
+
+        return $this->translator->trans('days_count_down', ['days' => $diffDays], 'common');
     }
 
     protected function btnAction(UpdateObject $updateObject)

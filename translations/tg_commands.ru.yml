@@ -35,8 +35,9 @@ where.response: |
   🌍 [55.816474, 38.254492](https://yandex.ru/maps/-/CCUfVRE4pD)
   🌍 [55°48′59″N, 38°15′16″E](https://yandex.ru/maps/-/CCUfVRE4pD)
 
-when.response: |
-  3 этап ➔ 28-29 января 2023
+when.response: '%num% этап ➔ %readable_dates% \(%days_count_down%\)'
+when.btn.field.text: 'Схема поля'
+when.btn.schedule.text: '📝 Расписание'
 
 events.response: 'Расписание и информация по этапам:'
 
