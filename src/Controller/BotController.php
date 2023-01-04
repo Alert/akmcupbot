@@ -4,8 +4,8 @@ namespace App\Controller;
 
 
 use App\Event\TgCallbackEvent;
+use App\Service\LoggerService;
 use Borsaco\TelegramBotApiBundle\Service\Bot;
-use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,14 +16,14 @@ use Telegram\Bot\Api;
 class BotController extends AbstractController
 {
     private Api $bot;
-    private LoggerInterface $botLogger;
     private EventDispatcherInterface $dispatcher;
+    private LoggerService $logger;
 
-    public function __construct(Bot $bot, LoggerInterface $botLogger, EventDispatcherInterface $dispatcher)
+    public function __construct(Bot $bot, EventDispatcherInterface $dispatcher, LoggerService $logger)
     {
         $this->bot        = $bot->getBot();
-        $this->botLogger  = $botLogger;
         $this->dispatcher = $dispatcher;
+        $this->logger     = $logger;
     }
 
     /**
@@ -34,7 +34,7 @@ class BotController extends AbstractController
     {
         $data = $this->bot->getWebhookUpdate();
 
-        $this->botLogger->info('Webhook receive data', compact('data'));
+        $this->logger->logWebhookData($data);
 
         $event = new TgCallbackEvent($data);
         $this->dispatcher->dispatch($event, TgCallbackEvent::NAME);
