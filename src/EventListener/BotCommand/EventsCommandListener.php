@@ -11,8 +11,8 @@ use Telegram\Bot\Objects\Update as UpdateObject;
 #[AsEventListener(event: 'tg.callback', method: 'handler')]
 class EventsCommandListener extends AbstractCommandListener
 {
-    public const NAME = 'events';
-    public const ALIAS = 'этапы';
+    public string $name = 'events';
+    public string $alias = 'этапы';
 
     public function handler(TgCallbackEvent $e): void
     {
@@ -20,7 +20,7 @@ class EventsCommandListener extends AbstractCommandListener
 
         if ($update->objectType() === 'message') {
             $text = $update->getMessage()->text ?? '';
-            if (str_starts_with($text, '/' . self::NAME) || str_starts_with($text, '/' . self::ALIAS))
+            if (str_starts_with($text, '/' . $this->name) || str_starts_with($text, '/' . $this->alias))
                 $this->commandAction($update);
         }
 
@@ -50,7 +50,8 @@ class EventsCommandListener extends AbstractCommandListener
         $this->sendMessage($params, false, $senderChatId);
     }
 
-    public function btnEventsBack(CallbackQuery $callback){
+    public function btnEventsBack(CallbackQuery $callback)
+    {
         $this->bot->editMessageText([
             'chat_id' => $callback->message->chat->id,
             'message_id' => $callback->message->messageId,
@@ -90,21 +91,24 @@ class EventsCommandListener extends AbstractCommandListener
         if ($callback->data === 'events.5') $this->btnEvents5($callback);
     }
 
-    public function btnEvents1(CallbackQuery $callback){
+    public function btnEvents1(CallbackQuery $callback)
+    {
         $this->bot->editMessageText([
             'chat_id' => $callback->message->chat->id,
             'message_id' => $callback->message->messageId,
             'text' => $this->translator->trans('events.response', [], 'tg_commands'),
             'reply_markup' => json_encode([
                 'inline_keyboard' => [
-                    [['text' => 'Схема поля', 'callback_data' => 'events.1.field'],['text' => 'Расписание', 'callback_data' => 'events.1.schedule']],
-                    [['text' => 'Результаты', 'callback_data' => 'events.1.result'],['text' => 'Записи игр', 'callback_data' => 'events.1.video']],
+                    [['text' => 'Схема поля', 'callback_data' => 'events.1.field'], ['text' => 'Расписание', 'callback_data' => 'events.1.schedule']],
+                    [['text' => 'Результаты', 'callback_data' => 'events.1.result'], ['text' => 'Записи игр', 'callback_data' => 'events.1.video']],
                     [['text' => '🔙 к списку этапов', 'callback_data' => 'events.back']]],
             ]),
         ]);
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
     }
-    public function btnEvents1Field(CallbackQuery $callback){
+
+    public function btnEvents1Field(CallbackQuery $callback)
+    {
         $this->bot->sendMediaGroup([
             'chat_id' => $callback->message->chat->id,
             'media' => json_encode([
@@ -115,7 +119,9 @@ class EventsCommandListener extends AbstractCommandListener
         ]);
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
     }
-    public function btnEvents1Schedule(CallbackQuery $callback){
+
+    public function btnEvents1Schedule(CallbackQuery $callback)
+    {
         $this->bot->sendMediaGroup([
             'chat_id' => $callback->message->chat->id,
             'media' => json_encode([
@@ -128,7 +134,9 @@ class EventsCommandListener extends AbstractCommandListener
         ]);
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
     }
-    public function btnEvents1Broadcast(CallbackQuery $callback){
+
+    public function btnEvents1Broadcast(CallbackQuery $callback)
+    {
         $this->bot->editMessageText([
             'chat_id' => $callback->message->chat->id,
             'message_id' => $callback->message->messageId,
@@ -148,7 +156,9 @@ class EventsCommandListener extends AbstractCommandListener
         ]);
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
     }
-    public function btnEvents1Result(CallbackQuery $callback){
+
+    public function btnEvents1Result(CallbackQuery $callback)
+    {
         $params = [
             'chat_id' => $callback->message->chat->id,
             'text' => str_replace('-', '\-', $this->translator->trans('events.1.result', [], 'tg_commands')),
@@ -158,22 +168,25 @@ class EventsCommandListener extends AbstractCommandListener
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
     }
 
-    public function btnEvents2(CallbackQuery $callback){
+    public function btnEvents2(CallbackQuery $callback)
+    {
         $this->bot->editMessageText([
             'chat_id' => $callback->message->chat->id,
             'message_id' => $callback->message->messageId,
             'text' => $this->translator->trans('events.response', [], 'tg_commands'),
             'reply_markup' => json_encode([
                 'inline_keyboard' => [
-                    [['text' => 'Схема поля', 'callback_data' => 'events.2.field'],['text' => '📝 Расписание', 'callback_data' => 'events.2.schedule']],
-                    [['text' => 'Результаты', 'callback_data' => 'events.2.result'],['text' => 'Записи игр', 'callback_data' => 'events.2.broadcast']],
+                    [['text' => 'Схема поля', 'callback_data' => 'events.2.field'], ['text' => '📝 Расписание', 'callback_data' => 'events.2.schedule']],
+                    [['text' => 'Результаты', 'callback_data' => 'events.2.result'], ['text' => 'Записи игр', 'callback_data' => 'events.2.broadcast']],
 //                    [['text' => 'Заявка', 'url' => 'https://docs.google.com/forms/d/e/1FAIpQLSc3wgzDSgsTkGPwYPs1ZhWhifGUVSW0ID5d9LmeV19ZiYkQQA/viewform']],
                     [['text' => '🔙 к списку этапов', 'callback_data' => 'events.back']]],
             ]),
         ]);
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
     }
-    public function btnEvents2Field(CallbackQuery $callback){
+
+    public function btnEvents2Field(CallbackQuery $callback)
+    {
         $this->bot->sendMediaGroup([
             'chat_id' => $callback->message->chat->id,
             'media' => json_encode([
@@ -184,7 +197,9 @@ class EventsCommandListener extends AbstractCommandListener
         ]);
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
     }
-    public function btnEvents2Schedule(CallbackQuery $callback){
+
+    public function btnEvents2Schedule(CallbackQuery $callback)
+    {
         $this->bot->sendMediaGroup([
             'chat_id' => $callback->message->chat->id,
             'media' => json_encode([
@@ -194,7 +209,9 @@ class EventsCommandListener extends AbstractCommandListener
         ]);
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
     }
-    public function btnEvents2Broadcast(CallbackQuery $callback){
+
+    public function btnEvents2Broadcast(CallbackQuery $callback)
+    {
         $this->bot->editMessageText([
             'chat_id' => $callback->message->chat->id,
             'message_id' => $callback->message->messageId,
@@ -214,7 +231,9 @@ class EventsCommandListener extends AbstractCommandListener
         ]);
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
     }
-    public function btnEvents2Result(CallbackQuery $callback){
+
+    public function btnEvents2Result(CallbackQuery $callback)
+    {
         $params = [
             'chat_id' => $callback->message->chat->id,
             'text' => str_replace('-', '\-', $this->translator->trans('events.2.result', [], 'tg_commands')),
@@ -224,21 +243,26 @@ class EventsCommandListener extends AbstractCommandListener
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
     }
 
-    public function btnEvents3(CallbackQuery $callback){
+    public function btnEvents3(CallbackQuery $callback)
+    {
         $this->sendMessage([
             'chat_id' => $callback->message->chat->id,
             'text' => 'информации ещё нет :(',
         ]);
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
     }
-    public function btnEvents4(CallbackQuery $callback){
+
+    public function btnEvents4(CallbackQuery $callback)
+    {
         $this->sendMessage([
             'chat_id' => $callback->message->chat->id,
             'text' => 'информации ещё нет :(',
         ]);
         $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
     }
-    public function btnEvents5(CallbackQuery $callback){
+
+    public function btnEvents5(CallbackQuery $callback)
+    {
         $this->sendMessage([
             'chat_id' => $callback->message->chat->id,
             'text' => 'информации ещё нет :(',

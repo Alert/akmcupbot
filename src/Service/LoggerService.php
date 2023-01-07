@@ -1,10 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Service;
 
 use App\Repository\WebhookLogRepository;
 use DateTime;
-use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Exception as DBALException;
 use Psr\Log\LoggerInterface;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
@@ -27,7 +28,7 @@ class LoggerService
      * Construct
      *
      * @param WebhookLogRepository $webhookLogRepo
-     * @param LoggerInterface $botLogger
+     * @param LoggerInterface      $botLogger
      */
     public function __construct(WebhookLogRepository $webhookLogRepo, LoggerInterface $botLogger)
     {
@@ -49,8 +50,8 @@ class LoggerService
      * Log webhook data to db
      *
      * @param UpdateObject $data
+     *
      * @return void
-     * @throws Exception
      */
     public function logWebhookData(UpdateObject $data): void
     {
@@ -61,7 +62,11 @@ class LoggerService
         $firstName = $message->from?->firstName;
         $lastName  = $message->from?->lastName;
 
-        $this->webhookLogRepo->savePlainSql(new DateTime(), $username, $firstName, $lastName, $data);
+        try {
+            $this->webhookLogRepo->savePlainSql(new DateTime(), $username, $firstName, $lastName, $data);
+        } catch (DBALException $e) {
+            $this->getBotLogger()->error('DBAL error: ' . $e->getMessage());
+        }
     }
 
 }

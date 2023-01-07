@@ -10,8 +10,8 @@ use Telegram\Bot\Objects\Update as UpdateObject;
 #[AsEventListener(event: 'tg.callback', method: 'handler')]
 class WhereCommandListener extends AbstractCommandListener
 {
-    public const NAME = 'where';
-    public const ALIAS = 'где';
+    public string $name = 'where';
+    public string $alias = 'где';
 
     public function handler(TgCallbackEvent $e): void
     {
@@ -19,7 +19,7 @@ class WhereCommandListener extends AbstractCommandListener
 
         if ($update->objectType() === 'message') {
             $text = $update->getMessage()->text ?? '';
-            if (str_starts_with($text, '/' . self::NAME) || str_starts_with($text, '/' . self::ALIAS))
+            if (str_starts_with($text, '/' . $this->name) || str_starts_with($text, '/' . $this->alias))
                 $this->commandAction($update);
         }
     }

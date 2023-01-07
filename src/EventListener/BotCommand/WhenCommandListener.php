@@ -5,7 +5,6 @@ namespace App\EventListener\BotCommand;
 
 use App\Event\TgCallbackEvent;
 use Carbon\Carbon;
-use DateTime;
 use DateTimeInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Telegram\Bot\Objects\Update as UpdateObject;
@@ -14,8 +13,8 @@ use Telegram\Bot\Objects\Update as UpdateObject;
 #[AsEventListener(event: 'tg.callback', method: 'handler')]
 class WhenCommandListener extends AbstractCommandListener
 {
-    public const NAME = 'when';
-    public const ALIAS = 'когда';
+    public string $name = 'when';
+    public string $alias = 'когда';
 
     public function handler(TgCallbackEvent $e): void
     {
@@ -23,7 +22,7 @@ class WhenCommandListener extends AbstractCommandListener
 
         if ($update->objectType() === 'message') {
             $text = $update->getMessage()->text ?? '';
-            if (str_starts_with($text, '/' . self::NAME) || str_starts_with($text, '/' . self::ALIAS))
+            if (str_starts_with($text, '/' . $this->name) || str_starts_with($text, '/' . $this->alias))
                 $this->commandAction($update);
         }
 

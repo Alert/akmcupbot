@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Repository;
 
@@ -45,6 +46,7 @@ class EventEntityRepository extends ServiceEntityRepository
      * Find one (next) uncompleted event
      *
      * @param DateTime $date
+     *
      * @return EventEntity|null
      * @throws NonUniqueResultException
      */

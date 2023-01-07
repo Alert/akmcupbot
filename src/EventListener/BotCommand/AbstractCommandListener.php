@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\EventListener\BotCommand;
 
-use App\Event\TgCallbackEvent;
 use App\Repository\EventEntityRepository;
 use Borsaco\TelegramBotApiBundle\Service\Bot;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
@@ -14,6 +13,20 @@ use Telegram\Bot\Objects\Message as MessageObject;
 
 abstract class AbstractCommandListener implements CommandListenerInterface
 {
+    /**
+     * Command name
+     *
+     * @var string
+     */
+    public string $name;
+
+    /**
+     * Command alias
+     *
+     * @var string
+     */
+    public string $alias;
+
     protected Api $bot;
     protected TranslatorInterface $translator;
     protected ContainerBagInterface $cfg;
@@ -34,6 +47,7 @@ abstract class AbstractCommandListener implements CommandListenerInterface
         $this->eventRepo  = $eventRepo;
     }
 
+// TODO: refactor
 //    /**
 //     * Check message data is a command
 //     *
@@ -70,9 +84,10 @@ abstract class AbstractCommandListener implements CommandListenerInterface
     /**
      * Send message wrapper
      *
-     * @param array $params
-     * @param bool $force Ignore dev mode if true
+     * @param array    $params
+     * @param bool     $force        Ignore dev mode if true
      * @param int|null $senderChatId For check dev chat id
+     *
      * @return MessageObject
      * @throws TelegramSDKException
      */
@@ -98,6 +113,7 @@ abstract class AbstractCommandListener implements CommandListenerInterface
      * Escape char for MarkdownV2
      *
      * @param string $char
+     *
      * @return string
      */
     protected function escapeChar(string $char): string
@@ -110,6 +126,7 @@ abstract class AbstractCommandListener implements CommandListenerInterface
      * Escape string for MarkdownV2
      *
      * @param string $string
+     *
      * @return string
      */
     protected function escapeString(string $string): string

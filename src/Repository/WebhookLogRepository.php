@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Repository;
 
@@ -44,11 +45,12 @@ class WebhookLogRepository extends ServiceEntityRepository
     /**
      * Save to db without ORM
      *
-     * @param DateTime $ts
+     * @param DateTime    $ts
      * @param string|null $username
      * @param string|null $firstName
      * @param string|null $lastName
-     * @param string $raw
+     * @param string      $raw
+     *
      * @return void
      * @throws Exception
      */

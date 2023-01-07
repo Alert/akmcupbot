@@ -5,9 +5,15 @@ namespace App\EventListener\BotCommand;
 
 use App\Event\TgCallbackEvent;
 
+/**
+ * Interface for all command listeners
+ */
 interface CommandListenerInterface
 {
-    public const NAME = null;
-
+    /**
+     * @param TgCallbackEvent $e
+     *
+     * @return void
+     */
     public function handler(TgCallbackEvent $e): void;
 }
