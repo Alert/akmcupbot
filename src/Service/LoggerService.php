@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Repository\WebhookLogRepository;
 use DateTime;
+use Doctrine\DBAL\Exception;
 use Psr\Log\LoggerInterface;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
@@ -49,6 +50,7 @@ class LoggerService
      *
      * @param UpdateObject $data
      * @return void
+     * @throws Exception
      */
     public function logWebhookData(UpdateObject $data): void
     {
@@ -61,4 +63,5 @@ class LoggerService
 
         $this->webhookLogRepo->savePlainSql(new DateTime(), $username, $firstName, $lastName, $data);
     }
+
 }

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 
 use App\Event\TgCallbackEvent;
+use App\Service\BotHelperService;
 use App\Service\LoggerService;
 use Borsaco\TelegramBotApiBundle\Service\Bot;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,12 +19,17 @@ class BotController extends AbstractController
     private Api $bot;
     private EventDispatcherInterface $dispatcher;
     private LoggerService $logger;
+    private BotHelperService $botHelper;
 
-    public function __construct(Bot $bot, EventDispatcherInterface $dispatcher, LoggerService $logger)
+    public function __construct(Bot                      $bot,
+                                EventDispatcherInterface $dispatcher,
+                                LoggerService            $logger,
+                                BotHelperService         $botHelper)
     {
         $this->bot        = $bot->getBot();
         $this->dispatcher = $dispatcher;
         $this->logger     = $logger;
+        $this->botHelper  = $botHelper;
     }
 
     /**
@@ -35,6 +41,9 @@ class BotController extends AbstractController
         $data = $this->bot->getWebhookUpdate();
 
         $this->logger->logWebhookData($data);
+        if (!$this->botHelper->hasMessageSendDate($data) || $this->botHelper->isMessageTimedOut($data)) {
+            $this->logger->getBotLogger()->warning('Incoming data don\'t have date or timed out');
+        }
 
         $event = new TgCallbackEvent($data);
         $this->dispatcher->dispatch($event, TgCallbackEvent::NAME);
