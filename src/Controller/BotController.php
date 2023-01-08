@@ -5,24 +5,22 @@ namespace App\Controller;
 
 
 use App\Event\TgCallbackEvent;
-use App\Service\BotHelperService;
+use App\Service\BotService;
 use App\Service\LoggerService;
-use Borsaco\TelegramBotApiBundle\Service\Bot;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Telegram\Bot\Api;
 
 #[Route('/bot', name: 'bot.')]
 class BotController extends AbstractController
 {
     /**
-     * Bot api
+     * Bot service
      *
-     * @var Api
+     * @var BotService
      */
-    private Api $bot;
+    private BotService $bot;
 
     /**
      * Event dispatcher
@@ -39,29 +37,19 @@ class BotController extends AbstractController
     private LoggerService $logger;
 
     /**
-     * Bot helper
-     *
-     * @var BotHelperService
-     */
-    private BotHelperService $botHelper;
-
-    /**
      * Constructor
      *
-     * @param Bot                      $bot
+     * @param BotService               $bot
      * @param EventDispatcherInterface $dispatcher
      * @param LoggerService            $logger
-     * @param BotHelperService         $botHelper
      */
-    public function __construct(Bot                      $bot,
+    public function __construct(BotService               $bot,
                                 EventDispatcherInterface $dispatcher,
-                                LoggerService            $logger,
-                                BotHelperService         $botHelper)
+                                LoggerService            $logger)
     {
-        $this->bot        = $bot->getBot();
+        $this->bot        = $bot;
         $this->dispatcher = $dispatcher;
         $this->logger     = $logger;
-        $this->botHelper  = $botHelper;
     }
 
     /**
@@ -72,10 +60,10 @@ class BotController extends AbstractController
     #[Route('/callback/', name: 'callback')]
     public function callback(): Response
     {
-        $data = $this->bot->getWebhookUpdate();
+        $data = $this->bot->getApi()->getWebhookUpdate();
         $this->logger->logWebhookData($data);
 
-        if (!$this->botHelper->hasMessageSendDate($data) || $this->botHelper->isMessageTimedOut($data)) {
+        if (!$this->bot->hasMessageSendDate($data) || $this->bot->isMessageTimedOut($data)) {
             $this->logger->getBotLogger()->warning('Incoming data don\'t have date or timed out');
         }
 

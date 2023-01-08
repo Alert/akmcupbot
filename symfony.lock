@@ -1,7 +1,4 @@
 {
-    "borsaco/telegram-bot-api-bundle": {
-        "version": "v1.1.2"
-    },
     "doctrine/doctrine-bundle": {
         "version": "2.8",
         "recipe": {

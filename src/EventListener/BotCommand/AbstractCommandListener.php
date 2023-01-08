@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace App\EventListener\BotCommand;
 
 use App\Repository\EventEntityRepository;
-use Borsaco\TelegramBotApiBundle\Service\Bot;
+use App\Service\BotService;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Telegram\Bot\Api;
+use Telegram\Bot\Api as BotApi;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 use Telegram\Bot\Objects\Message as MessageObject;
 
@@ -27,19 +27,21 @@ abstract class AbstractCommandListener implements CommandListenerInterface
      */
     public string $alias;
 
-    protected Api $bot;
+    protected BotService $bot;
+    protected BotApi $botApi;
     protected TranslatorInterface $translator;
     protected ContainerBagInterface $cfg;
     protected bool $isDevMode;
     protected int $devChatId;
     protected EventEntityRepository $eventRepo;
 
-    public function __construct(Bot                   $bot,
+    public function __construct(BotService            $bot,
                                 TranslatorInterface   $translator,
                                 ContainerBagInterface $cfg,
                                 EventEntityRepository $eventRepo)
     {
-        $this->bot        = $bot->getBot();
+        $this->bot        = $bot;
+        $this->botApi     = $bot->getApi();
         $this->translator = $translator;
         $this->cfg        = $cfg;
         $this->isDevMode  = $cfg->get('tg.dev_mode');
@@ -94,19 +96,19 @@ abstract class AbstractCommandListener implements CommandListenerInterface
     protected function sendMessage(array $params, bool $force = false, ?int $senderChatId = null): MessageObject
     {
         if ($this->isDevMode && !$force) {
-            $message = $this->bot->sendMessage([
+            $message = $this->botApi->sendMessage([
                 'chat_id' => $params['chat_id'],
                 'text' => "бот ненадолго отошёл, попробуйте чуть позже", // todo: move to translations
             ]);
 
             if ($senderChatId === $this->devChatId) {
-                $message = $this->bot->sendMessage($params);
+                $message = $this->botApi->sendMessage($params);
             }
 
             return $message;
         }
 
-        return $this->bot->sendMessage($params);
+        return $this->botApi->sendMessage($params);
     }
 
     /**

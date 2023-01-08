@@ -4,59 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3261ac69d9c78edfa3a7f23a4ea317d1",
+    "content-hash": "451ba71d80bfcbf8ba7bfd3d3ff32c35",
     "packages": [
-        {
-            "name": "borsaco/telegram-bot-api-bundle",
-            "version": "v1.1.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/borsaco/TelegramBotApiBundle.git",
-                "reference": "f253e3d2239358e8d73104804a73ee0028826439"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/borsaco/TelegramBotApiBundle/zipball/f253e3d2239358e8d73104804a73ee0028826439",
-                "reference": "f253e3d2239358e8d73104804a73ee0028826439",
-                "shasum": ""
-            },
-            "require": {
-                "irazasyed/telegram-bot-sdk": "^3.4",
-                "php": ">=7.2",
-                "symfony/framework-bundle": "^5.1 || ^6.0"
-            },
-            "type": "symfony-bundle",
-            "autoload": {
-                "psr-4": {
-                    "Borsaco\\TelegramBotApiBundle\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Alireza Seddighi",
-                    "email": "seddighi.alireza78@gmail.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "A simple wrapper for telegram-bot-api.",
-            "keywords": [
-                "Telegram-Bot-API",
-                "api",
-                "bot",
-                "php",
-                "symfony",
-                "telegram"
-            ],
-            "support": {
-                "issues": "https://github.com/borsaco/TelegramBotApiBundle/issues",
-                "source": "https://github.com/borsaco/TelegramBotApiBundle/tree/v1.1.2"
-            },
-            "time": "2022-01-29T19:50:05+00:00"
-        },
         {
             "name": "doctrine/cache",
             "version": "2.2.0",
