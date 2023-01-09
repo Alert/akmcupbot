@@ -13,27 +13,19 @@ class WhereCommandListener extends AbstractCommandListener
     public string $name = 'where';
     public string $alias = 'где';
 
-    public function handler(TgCallbackEvent $e): void
-    {
-        $update = $e->getUpdateObject();
-
-        if ($update->objectType() === 'message') {
-            $text = $update->getMessage()->text ?? '';
-            if (str_starts_with($text, '/' . $this->name) || str_starts_with($text, '/' . $this->alias))
-                $this->commandAction($update);
-        }
-    }
-
-    protected function commandAction(UpdateObject $updateObject): void
+    public function commandAction(UpdateObject $updateObject): void
     {
         $msg          = $updateObject->getMessage();
         $senderChatId = $msg->chat->id;
 
         $params = [
-            'chat_id' => $senderChatId,
             'text' => $this->translator->trans('where.response', [], 'tg_commands'),
             'parse_mode' => 'Markdown',
         ];
-        $this->sendMessage($params, false, $senderChatId);
+        $this->bot->sendMessage($params, $senderChatId);
+    }
+
+    public function btnAction(UpdateObject $updateObject): void
+    {
     }
 }

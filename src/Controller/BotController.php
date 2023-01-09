@@ -60,7 +60,7 @@ class BotController extends AbstractController
     #[Route('/callback/', name: 'callback')]
     public function callback(): Response
     {
-        $data = $this->bot->getApi()->getWebhookUpdate();
+        $data = $this->bot->getWebhookUpdate();
         $this->logger->logWebhookData($data);
 
         if (!$this->bot->hasMessageSendDate($data) || $this->bot->isMessageTimedOut($data)) {

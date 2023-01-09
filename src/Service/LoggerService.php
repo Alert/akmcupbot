@@ -63,7 +63,7 @@ class LoggerService
         $lastName  = $message->from?->lastName;
 
         try {
-            $this->webhookLogRepo->savePlainSql(new DateTime(), $username, $firstName, $lastName, $data);
+            $this->webhookLogRepo->savePlainSql(new DateTime(), $username, $firstName, $lastName, (string)$data);
         } catch (DBALException $e) {
             $this->getBotLogger()->error('DBAL error: ' . $e->getMessage());
         }

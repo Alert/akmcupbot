@@ -4,34 +4,19 @@ declare(strict_types=1);
 namespace App\EventListener\BotCommand;
 
 use App\Event\TgCallbackEvent;
+use App\Service\BotService;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
-// TODO: delete
 #[AsEventListener(event: 'tg.callback', method: 'handler')]
 class WhenCommandListener extends AbstractCommandListener
 {
     public string $name = 'when';
     public string $alias = 'когда';
 
-    public function handler(TgCallbackEvent $e): void
-    {
-        $update = $e->getUpdateObject();
-
-        if ($update->objectType() === 'message') {
-            $text = $update->getMessage()->text ?? '';
-            if (str_starts_with($text, '/' . $this->name) || str_starts_with($text, '/' . $this->alias))
-                $this->commandAction($update);
-        }
-
-        if ($update->objectType() === 'callback_query') {
-            $this->btnAction($update);
-        }
-    }
-
-    protected function commandAction(UpdateObject $updateObject): void
+    public function commandAction(UpdateObject $updateObject): void
     {
         $msg          = $updateObject->getMessage();
         $senderChatId = $msg->chat->id;
@@ -40,18 +25,17 @@ class WhenCommandListener extends AbstractCommandListener
 
         if (!$event) {
             $text = $this->translator->trans('no_info', [], 'common');
-            $this->sendMessage(['chat_id' => $senderChatId, 'text' => $text], false, $senderChatId);
+            $this->bot->sendMessage(['text' => $text], $senderChatId);
             return;
         }
 
         $text = $this->translator->trans('when.response', [
             '%num%' => $event->getNum(),
-            '%readable_dates%' => $this->escapeString($event->getReadableDates()),
-            '%days_count_down%' => $this->escapeString($this->getDaysCountDownText($event->getDateStart())),
+            '%readable_dates%' => BotService::escapeString($event->getReadableDates()),
+            '%days_count_down%' => BotService::escapeString($this->getDaysCountDownText($event->getDateStart())),
         ], 'tg_commands');
 
         $params = [
-            'chat_id' => $senderChatId,
             'text' => $text,
             'parse_mode' => 'MarkdownV2',
             'disable_web_page_preview' => true,
@@ -63,13 +47,14 @@ class WhenCommandListener extends AbstractCommandListener
                 ]],
             ])];
 
-        $this->sendMessage($params, false, $senderChatId);
+        $this->bot->sendMessage($params, $senderChatId);
     }
 
     /**
      * Get count down days text
      *
      * @param DateTimeInterface $date
+     *
      * @return string
      */
     private function getDaysCountDownText(DateTimeInterface $date): string
@@ -79,28 +64,24 @@ class WhenCommandListener extends AbstractCommandListener
         return $this->translator->trans('days_count_down', ['days' => $diffDays], 'common');
     }
 
-    protected function btnAction(UpdateObject $updateObject)
+    public function btnAction(UpdateObject $updateObject): void
     {
         $callback = $updateObject->callbackQuery;
 
         if ($callback->data === 'when.schedule') {
-//            $this->bot->sendMediaGroup([
+//            $this->botApi->sendMediaGroup([
 //                'chat_id' => $callback->message->chat->id,
 //                'media' => json_encode([
 //                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBi2OUddkVbxl4YG4Yk8bm67XmfWRMAAL2wDEb9OGgSAKEh1h8Cj81AQADAgADeQADKwQ'],
 //                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAIBjGOUddlR1T6ZsXo7uZz4-p8GRu0cAAL3wDEb9OGgSJHtN9GE-5b5AQADAgADeQADKwQ'],
 //                ]),
 //            ]);
-//            $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
-            $this->sendMessage([
-                'chat_id' => $callback->message->chat->id,
-                'text' => 'информации ещё нет :(',
-            ]);
-            $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
+            $this->bot->sendMessage(['text' => 'информации ещё нет :('], $callback->message->chat->id);
+            $this->bot->answerCallbackQuery($callback->id);
         }
 
         if ($callback->data === 'when.field') {
-//            $this->bot->sendMediaGroup([
+//            $this->botApi->sendMediaGroup([
 //                'chat_id' => $callback->message->chat->id,
 //                'media' => json_encode([
 //                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAN4Y4j8zvkU36ikwl_DKaodymfwIEEAAlbEMRtVOUlIBrchlFbJztgBAAMCAANzAAMrBA'],
@@ -108,12 +89,8 @@ class WhenCommandListener extends AbstractCommandListener
 //                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAN6Y4j8ztGotZcDBfcxpkfKlKv-LBEAAljEMRtVOUlIBWXOM4KaZ9UBAAMCAAN5AAMrBA'],
 //                ]),
 //            ]);
-//            $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
-            $this->sendMessage([
-                'chat_id' => $callback->message->chat->id,
-                'text' => 'информации ещё нет :(',
-            ]);
-            $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
+            $this->bot->sendMessage(['text' => 'информации ещё нет :('], $callback->message->chat->id);
+            $this->bot->answerCallbackQuery($callback->id);
         }
     }
 

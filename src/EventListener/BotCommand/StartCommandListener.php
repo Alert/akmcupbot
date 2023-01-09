@@ -13,33 +13,21 @@ class StartCommandListener extends AbstractCommandListener
     public string $name = 'start';
     public string $alias = 'старт';
 
-    public function handler(TgCallbackEvent $e): void
-    {
-        $update = $e->getUpdateObject();
-
-        if ($update->objectType() === 'message') {
-            $text = $update->getMessage()->text ?? '';
-            if (str_starts_with($text, '/' . $this->name) || str_starts_with($text, '/' . $this->alias))
-                $this->commandAction($update);
-        }
-    }
-
-    protected function commandAction(UpdateObject $updateObject): void
+    public function commandAction(UpdateObject $updateObject): void
     {
         $msg          = $updateObject->getMessage();
         $senderChatId = $msg->chat->id;
         $username     = $msg->from->firstName ?: $msg->from->username;
 
         $params = [
-            'chat_id' => $senderChatId,
-            'text' => $this->translator->trans(
-                'start.response',
-                ['%username%' => $username],
-                'tg_commands'
-            ),
+            'text' => $this->translator->trans('start.response', ['%username%' => $username], 'tg_commands'),
             'parse_mode' => 'Markdown',
             'disable_web_page_preview' => true,
         ];
-        $this->sendMessage($params, true, $senderChatId);
+        $this->bot->sendMessage($params, $senderChatId);
+    }
+
+    public function btnAction(UpdateObject $updateObject): void
+    {
     }
 }

@@ -26,3 +26,5 @@ services:
     App\Service\BotService:
         arguments:
             $token: '%env(string:TG_BOT_ACCESS_TOKEN)%'
+            $isDevMode: '%env(bool:TG_BOT_DEV_MODE)%'
+            $devChatId: '%env(bool:TG_DEV_CHAT_ID)%'

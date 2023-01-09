@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Repository\EventEntityRepository;
+use App\Repository\EventRepository;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Table(name: 'event')]
-#[ORM\Entity(repositoryClass: EventEntityRepository::class)]
+#[ORM\Entity(repositoryClass: EventRepository::class)]
 class EventEntity
 {
     #[ORM\Id]

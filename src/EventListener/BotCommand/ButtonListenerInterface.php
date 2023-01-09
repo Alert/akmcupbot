@@ -6,16 +6,16 @@ namespace App\EventListener\BotCommand;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
 /**
- * Interface for all command listeners
+ * Interface for all buttons listeners
  */
-interface CommandListenerInterface
+interface ButtonListenerInterface
 {
     /**
-     * Command action
+     * Buttons action
      *
      * @param UpdateObject $updateObject
      *
      * @return void
      */
-    public function commandAction(UpdateObject $updateObject): void;
+    public function btnAction(UpdateObject $updateObject): void;
 }

@@ -1,7 +1,6 @@
 parameters:
     tg.dev_mode: '%env(bool:TG_BOT_DEV_MODE)%'
     tg.dev_chat_id: '%env(int:TG_DEV_CHAT_ID)%'
-    contacts.phone: '%env(string:CONTACTS_PHONE)%'
 
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:

@@ -3,15 +3,15 @@ declare(strict_types=1);
 
 namespace App\EventListener\BotCommand;
 
-use App\Repository\EventEntityRepository;
+use App\Event\TgCallbackEvent;
+use App\Repository\EventRepository;
 use App\Service\BotService;
+use App\Service\DynamicParamService;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Telegram\Bot\Api as BotApi;
-use Telegram\Bot\Exceptions\TelegramSDKException;
-use Telegram\Bot\Objects\Message as MessageObject;
+use Telegram\Bot\Objects\Update as UpdateObject;
 
-abstract class AbstractCommandListener implements CommandListenerInterface
+abstract class AbstractCommandListener implements CommandListenerInterface, ButtonListenerInterface
 {
     /**
      * Command name
@@ -28,112 +28,86 @@ abstract class AbstractCommandListener implements CommandListenerInterface
     public string $alias;
 
     protected BotService $bot;
-    protected BotApi $botApi;
     protected TranslatorInterface $translator;
-    protected ContainerBagInterface $cfg;
     protected bool $isDevMode;
     protected int $devChatId;
-    protected EventEntityRepository $eventRepo;
+    protected EventRepository $eventRepo;
+
+    /**
+     * Dynamic param service
+     *
+     * @var DynamicParamService
+     */
+    protected DynamicParamService $dynamicParamService;
 
     public function __construct(BotService            $bot,
                                 TranslatorInterface   $translator,
-                                ContainerBagInterface $cfg,
-                                EventEntityRepository $eventRepo)
+                                EventRepository       $eventRepo,
+                                DynamicParamService   $dynamicParamService,
+                                ContainerBagInterface $cfg)
     {
-        $this->bot        = $bot;
-        $this->botApi     = $bot->getApi();
-        $this->translator = $translator;
-        $this->cfg        = $cfg;
-        $this->isDevMode  = $cfg->get('tg.dev_mode');
-        $this->devChatId  = $cfg->get('tg.dev_chat_id');
-        $this->eventRepo  = $eventRepo;
+        $this->bot                 = $bot;
+        $this->translator          = $translator;
+        $this->eventRepo           = $eventRepo;
+        $this->dynamicParamService = $dynamicParamService;
+
+        $this->isDevMode = $cfg->get('tg.dev_mode');
+        $this->devChatId = $cfg->get('tg.dev_chat_id');
     }
 
-// TODO: refactor
-//    /**
-//     * Check message data is a command
-//     *
-//     * @param TgCallbackEvent $e
-//     * @return bool
-//     */
-//    protected function isCommand(TgCallbackEvent $e): bool
-//    {
-//        $entities = $e->getMessage()['entities'] ?? [];
-//        $firstEntity = array_shift($entities);
-//        $type = $firstEntity['type'] ?? '';
-//
-//        return $type === 'bot_command';
-//    }
-//
-//    /**
-//     * Match command name for different listener
-//     *
-//     * @param TgCallbackEvent $e
-//     * @return bool
-//     */
-//    protected function commandNameMatching(TgCallbackEvent $e): bool
-//    {
-//        return $e->getCommand() === static::NAME;
-//    }
-//
-//    public function handler(TgCallbackEvent $e): void
-//    {
-//        if (!$this->isCommand($e) || !$this->commandNameMatching($e)) return;
-//
-//        $this->action($e);
-//    }
-
-    /**
-     * Send message wrapper
-     *
-     * @param array    $params
-     * @param bool     $force        Ignore dev mode if true
-     * @param int|null $senderChatId For check dev chat id
-     *
-     * @return MessageObject
-     * @throws TelegramSDKException
-     */
-    protected function sendMessage(array $params, bool $force = false, ?int $senderChatId = null): MessageObject
+    public function handler(TgCallbackEvent $e): void
     {
-        if ($this->isDevMode && !$force) {
-            $message = $this->botApi->sendMessage([
-                'chat_id' => $params['chat_id'],
-                'text' => "бот ненадолго отошёл, попробуйте чуть позже", // todo: move to translations
-            ]);
+        $update = $e->getUpdateObject();
 
-            if ($senderChatId === $this->devChatId) {
-                $message = $this->botApi->sendMessage($params);
-            }
-
-            return $message;
+        if ($this->isCommand($update) && $this->commandNameMatching($update)) {
+            $this->commandAction($update);
         }
 
-        return $this->botApi->sendMessage($params);
+        if ($this->isCallbackQuery($update)) {
+            $this->btnAction($update);
+        }
     }
 
     /**
-     * Escape char for MarkdownV2
+     * Check message data is a command
      *
-     * @param string $char
+     * @param UpdateObject $updateObject
      *
-     * @return string
+     * @return bool
      */
-    protected function escapeChar(string $char): string
+    private function isCommand(UpdateObject $updateObject): bool
     {
-        $num = ord($char);
-        return $num <= 126 ? '\\' . $char : $char;
+        return $updateObject->objectType() === 'message' && str_starts_with($updateObject->getMessage()->text, '/');
     }
 
     /**
-     * Escape string for MarkdownV2
+     * Check income data is callback query
      *
-     * @param string $string
+     * @param UpdateObject $updateObject
      *
-     * @return string
+     * @return bool
      */
-    protected function escapeString(string $string): string
+    private function isCallbackQuery(UpdateObject $updateObject): bool
     {
-        return implode('', array_map([$this, 'escapeChar'], str_split($string)));
+        return $updateObject->objectType() === 'callback_query';
     }
+
+    /**
+     * Match command name for different listener
+     *
+     * @param UpdateObject $updateObject
+     *
+     * @return bool
+     */
+    private function commandNameMatching(UpdateObject $updateObject): bool
+    {
+        $text         = trim($updateObject->getMessage()->text);
+        $delimiterPos = strpos($text, ' ');
+
+        $cmdName = substr($text, 1, $delimiterPos !== false ? $delimiterPos : null);
+
+        return $cmdName === $this->name || $cmdName === $this->alias;
+    }
+
 
 }
