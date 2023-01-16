@@ -4,9 +4,10 @@ declare(strict_types=1);
 namespace App\Controller;
 
 
-use App\Event\TgCallbackEvent;
+use App\Event\TgEventFactory;
 use App\Service\BotService;
 use App\Service\LoggerService;
+use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -60,15 +61,19 @@ class BotController extends AbstractController
     #[Route('/callback/', name: 'callback')]
     public function callback(): Response
     {
-        $data = $this->bot->getWebhookUpdate();
-        $this->logger->logWebhookData($data);
+        $updateObj = $this->bot->getWebhookUpdate();
+        $this->logger->logWebhookData($updateObj);
 
-        if (!$this->bot->hasMessageSendDate($data) || $this->bot->isMessageTimedOut($data)) {
+        if (!$this->bot->hasMessageSendDate($updateObj) || $this->bot->isMessageTimedOut($updateObj)) {
             $this->logger->getBotLogger()->warning('Incoming data don\'t have date or timed out');
         }
 
-        $event = new TgCallbackEvent($data);
-        $this->dispatcher->dispatch($event, TgCallbackEvent::NAME);
+        try {
+            $event = (new TgEventFactory())->create($updateObj);
+            $this->dispatcher->dispatch($event, $event::class);
+        } catch (LogicException $e) {
+            $this->logger->getBotLogger()->warning($e->getMessage());
+        }
 
         return new Response();
     }

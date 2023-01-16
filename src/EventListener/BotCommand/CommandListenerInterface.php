@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\EventListener\BotCommand;
 
-use Telegram\Bot\Objects\Update as UpdateObject;
+use App\Event\TgMessageEvent;
 
 /**
  * Interface for all command listeners
@@ -11,11 +11,11 @@ use Telegram\Bot\Objects\Update as UpdateObject;
 interface CommandListenerInterface
 {
     /**
-     * Command action
+     * Command event handler
      *
-     * @param UpdateObject $updateObject
+     * @param TgMessageEvent $event
      *
      * @return void
      */
-    public function commandAction(UpdateObject $updateObject): void;
+    public function commandHandler(TgMessageEvent $event): void;
 }

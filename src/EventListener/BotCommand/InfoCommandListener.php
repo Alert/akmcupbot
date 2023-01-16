@@ -3,36 +3,39 @@ declare(strict_types=1);
 
 namespace App\EventListener\BotCommand;
 
-use App\Service\BotService;
+use App\Event\TgCallbackQueryEvent;
+use App\Event\TgMessageEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
-#[AsEventListener(event: 'tg.callback', method: 'handler')]
+#[AsEventListener(event: TgMessageEvent::class, method: 'commandHandler')]
+#[AsEventListener(event: TgCallbackQueryEvent::class, method: 'buttonHandler')]
 class InfoCommandListener extends AbstractCommandListener
 {
     public string $name = 'info';
     public string $alias = 'инфо';
 
-    public function commandAction(UpdateObject $updateObject): void
+    /**
+     * {@inheritdoc}
+     */
+    public function commandAction(UpdateObject $updateObj): void
     {
-        $msg          = $updateObject->getMessage();
+        $msg          = $updateObj->getMessage();
         $senderChatId = $msg->chat->id;
 
         $contactsPhone = $this->dynamicParamService->getValue('contacts.phone');
 
-        $params = [
-            'text' => $this->translator->trans(
-                'info.response',
-                ['%phone%' => BotService::escapeString($contactsPhone)],
-                'tg_commands'
-            ),
-            'parse_mode' => 'MarkdownV2',
-            'disable_web_page_preview' => true,
-        ];
+        $text = $this->dynamicParamService->getValue('start.response');
+        $text = str_replace('%phone%', $contactsPhone, $text);
+
+        $params = ['text' => $text, 'parse_mode' => 'MarkdownV2', 'disable_web_page_preview' => true,];
         $this->bot->sendMessage($params, $senderChatId);
     }
 
-    public function btnAction(UpdateObject $updateObject): void
+    /**
+     * {@inheritdoc}
+     */
+    public function buttonAction(UpdateObject $updateObj): void
     {
     }
 }

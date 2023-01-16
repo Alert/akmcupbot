@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\EventListener\BotCommand;
 
-use Telegram\Bot\Objects\Update as UpdateObject;
+use App\Event\TgCallbackQueryEvent;
 
 /**
  * Interface for all buttons listeners
@@ -11,11 +11,11 @@ use Telegram\Bot\Objects\Update as UpdateObject;
 interface ButtonListenerInterface
 {
     /**
-     * Buttons action
+     * Button handler
      *
-     * @param UpdateObject $updateObject
+     * @param TgCallbackQueryEvent $event
      *
      * @return void
      */
-    public function btnAction(UpdateObject $updateObject): void;
+    public function buttonHandler(TgCallbackQueryEvent $event): void;
 }

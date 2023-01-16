@@ -7,6 +7,7 @@ use App\Entity\EventEntity;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -59,5 +60,31 @@ class EventRepository extends ServiceEntityRepository
         $query = $qb->getQuery();
 
         return $query->getOneOrNullResult();
+    }
+
+    /**
+     * Find one (next) uncompleted event
+     *
+     * @param int $seasonNum
+     * @param int $eventNum
+     *
+     * @return EventEntity|null
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    public function findOneBySeasonNumAndEventNum(int $seasonNum, int $eventNum): ?EventEntity
+    {
+        $qb = $this->createQueryBuilder('e');
+        $qb->andWhere('e.season = :seasonNum')->setParameter('seasonNum', $seasonNum);
+        $qb->andWhere('e.num = :eventNum')->setParameter('eventNum', $eventNum);
+        $qb->leftJoin('e.details', 'ed');
+        $qb->setMaxResults(1);
+        $query = $qb->getQuery();
+
+        /** @var EventEntity $event */
+        $event = $query->getSingleResult();
+
+
+        return $event;
     }
 }

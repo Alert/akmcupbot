@@ -21,6 +21,11 @@ class BotService
     public const MESSAGE_TIME_OUT = 10;
 
     /**
+     * Exclusion for escape MarkdownV2
+     */
+    public const ESCAPE_CHAR_EXCLUSION = ['*', '_', '~'];
+
+    /**
      * Api object
      *
      * @var Api
@@ -187,6 +192,10 @@ class BotService
      */
     public static function escapeChar(string $char): string
     {
+        if (in_array($char, self::ESCAPE_CHAR_EXCLUSION)) {
+            return $char;
+        }
+
         $num = ord($char);
         return $num <= 126 ? '\\' . $char : $char;
     }

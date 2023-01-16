@@ -3,16 +3,18 @@ declare(strict_types=1);
 
 namespace App\EventListener\BotCommand;
 
-use App\Event\TgCallbackEvent;
-use App\Repository\EventRepository;
+use App\Event\TgCallbackQueryEvent;
+use App\Event\TgMessageEvent;
 use App\Service\BotService;
 use App\Service\DynamicParamService;
-use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
 abstract class AbstractCommandListener implements CommandListenerInterface, ButtonListenerInterface
 {
+    const BUTTONS_PER_ROW = 2;
+
     /**
      * Command name
      *
@@ -27,11 +29,26 @@ abstract class AbstractCommandListener implements CommandListenerInterface, Butt
      */
     public string $alias;
 
+    /**
+     * Bot wrapper
+     *
+     * @var BotService
+     */
     protected BotService $bot;
+
+    /**
+     * Translator
+     *
+     * @var TranslatorInterface
+     */
     protected TranslatorInterface $translator;
-    protected bool $isDevMode;
-    protected int $devChatId;
-    protected EventRepository $eventRepo;
+
+    /**
+     * Doctrine
+     *
+     * @var ManagerRegistry
+     */
+    protected ManagerRegistry $doctrine;
 
     /**
      * Dynamic param service
@@ -40,33 +57,54 @@ abstract class AbstractCommandListener implements CommandListenerInterface, Butt
      */
     protected DynamicParamService $dynamicParamService;
 
-    public function __construct(BotService            $bot,
-                                TranslatorInterface   $translator,
-                                EventRepository       $eventRepo,
-                                DynamicParamService   $dynamicParamService,
-                                ContainerBagInterface $cfg)
+    public function __construct(BotService          $bot,
+                                TranslatorInterface $translator,
+                                ManagerRegistry     $doctrine,
+                                DynamicParamService $dynamicParamService)
     {
         $this->bot                 = $bot;
         $this->translator          = $translator;
-        $this->eventRepo           = $eventRepo;
+        $this->doctrine            = $doctrine;
         $this->dynamicParamService = $dynamicParamService;
-
-        $this->isDevMode = $cfg->get('tg.dev_mode');
-        $this->devChatId = $cfg->get('tg.dev_chat_id');
     }
 
-    public function handler(TgCallbackEvent $e): void
+    /**
+     * {@inheritdoc}
+     */
+    public function commandHandler(TgMessageEvent $event): void
     {
-        $update = $e->getUpdateObject();
+        $updateObj = $event->getUpdateObject();
 
-        if ($this->isCommand($update) && $this->commandNameMatching($update)) {
-            $this->commandAction($update);
-        }
-
-        if ($this->isCallbackQuery($update)) {
-            $this->btnAction($update);
+        if ($this->isCommand($updateObj) && $this->commandNameMatching($updateObj)) {
+            $this->commandAction($updateObj);
         }
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function buttonHandler(TgCallbackQueryEvent $event): void
+    {
+        $this->buttonAction($event->getUpdateObject());
+    }
+
+    /**
+     * Command action
+     *
+     * @param UpdateObject $updateObj
+     *
+     * @return void
+     */
+    abstract public function commandAction(UpdateObject $updateObj): void;
+
+    /**
+     * Button action
+     *
+     * @param UpdateObject $updateObj
+     *
+     * @return void
+     */
+    abstract public function buttonAction(UpdateObject $updateObj): void;
 
     /**
      * Check message data is a command
@@ -77,19 +115,7 @@ abstract class AbstractCommandListener implements CommandListenerInterface, Butt
      */
     private function isCommand(UpdateObject $updateObject): bool
     {
-        return $updateObject->objectType() === 'message' && str_starts_with($updateObject->getMessage()->text, '/');
-    }
-
-    /**
-     * Check income data is callback query
-     *
-     * @param UpdateObject $updateObject
-     *
-     * @return bool
-     */
-    private function isCallbackQuery(UpdateObject $updateObject): bool
-    {
-        return $updateObject->objectType() === 'callback_query';
+        return str_starts_with($updateObject->getMessage()?->text, '/');
     }
 
     /**
@@ -108,6 +134,5 @@ abstract class AbstractCommandListener implements CommandListenerInterface, Butt
 
         return $cmdName === $this->name || $cmdName === $this->alias;
     }
-
 
 }

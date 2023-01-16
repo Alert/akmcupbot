@@ -3,31 +3,38 @@ declare(strict_types=1);
 
 namespace App\EventListener\BotCommand;
 
-use App\Event\TgCallbackEvent;
+use App\Event\TgCallbackQueryEvent;
+use App\Event\TgMessageEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
-#[AsEventListener(event: 'tg.callback', method: 'handler')]
+#[AsEventListener(event: TgMessageEvent::class, method: 'commandHandler')]
+#[AsEventListener(event: TgCallbackQueryEvent::class, method: 'buttonHandler')]
 class StartCommandListener extends AbstractCommandListener
 {
     public string $name = 'start';
     public string $alias = 'старт';
 
-    public function commandAction(UpdateObject $updateObject): void
+    /**
+     * {@inheritdoc}
+     */
+    public function commandAction(UpdateObject $updateObj): void
     {
-        $msg          = $updateObject->getMessage();
+        $msg          = $updateObj->getMessage();
         $senderChatId = $msg->chat->id;
-        $username     = $msg->from->firstName ?: $msg->from->username;
 
         $params = [
-            'text' => $this->translator->trans('start.response', ['%username%' => $username], 'tg_commands'),
+            'text' => $this->dynamicParamService->getValue('start.response'),
             'parse_mode' => 'Markdown',
             'disable_web_page_preview' => true,
         ];
         $this->bot->sendMessage($params, $senderChatId);
     }
 
-    public function btnAction(UpdateObject $updateObject): void
+    /**
+     * {@inheritdoc}
+     */
+    public function buttonAction(UpdateObject $updateObj): void
     {
     }
 }

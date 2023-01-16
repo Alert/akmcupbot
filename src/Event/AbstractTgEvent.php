@@ -7,13 +7,8 @@ use Symfony\Contracts\EventDispatcher\Event;
 use Telegram\Bot\Objects\Update;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
-class TgCallbackEvent extends Event
+abstract class AbstractTgEvent extends Event
 {
-    /**
-     * Event name
-     */
-    public const NAME = 'tg.callback';
-
     /**
      * Event data
      *
@@ -31,6 +26,11 @@ class TgCallbackEvent extends Event
         $this->updateObject = $updateObject;
     }
 
+    /**
+     * Get update object
+     *
+     * @return UpdateObject
+     */
     public function getUpdateObject(): UpdateObject
     {
         return $this->updateObject;

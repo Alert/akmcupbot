@@ -1,6 +1,19 @@
 maintenance: 'бот ненадолго отошёл, попробуйте чуть позже'
 no_info: 'информации ещё нет :('
 
+events.response: 'Расписание и информация по этапам:'
+events.broadcast: '🎥 Трансляции:'
+when.response: '{num} этап ➔ {readable_dates} \({days_count_down}\)'
+when.btn.info.text: 'ℹ️ информация о этапе'
+
+event.btn.text: '{num} этап ➔ {readable_dates}'
+event.btn.text.passed: '🏁 {num} этап ➔ {readable_dates}'
+
+btn.back-to-events-list: '🔙 к списку этапов'
+btn.register_to_event: 'Заявка на участие'
+btn.field: 'Схема поля'
+btn.schedule: '📝 Расписание'
+
 days_count_down: >-
   {days, plural,
     =0 {уже идёт!}
