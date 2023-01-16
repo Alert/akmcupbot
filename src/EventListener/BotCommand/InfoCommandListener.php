@@ -3,42 +3,40 @@ declare(strict_types=1);
 
 namespace App\EventListener\BotCommand;
 
-use App\Event\TgCallbackEvent;
+use App\Event\TgCallbackQueryEvent;
+use App\Event\TgMessageEvent;
+use App\Service\BotService;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
-#[AsEventListener(event: 'tg.callback', method: 'handler')]
+#[AsEventListener(event: TgMessageEvent::class, method: 'commandHandler')]
+#[AsEventListener(event: TgCallbackQueryEvent::class, method: 'buttonHandler')]
 class InfoCommandListener extends AbstractCommandListener
 {
-    public const NAME = 'info';
-    public const ALIAS = 'инфо';
+    public string $name = 'info';
+    public string $alias = 'инфо';
 
-    public function handler(TgCallbackEvent $e): void
+    /**
+     * {@inheritdoc}
+     */
+    public function commandAction(UpdateObject $updateObj): void
     {
-        $update = $e->getUpdateObject();
-
-        if ($update->objectType() === 'message') {
-            $text = $update->getMessage()->text ?? '';
-            if (str_starts_with($text, '/' . self::NAME) || str_starts_with($text, '/' . self::ALIAS))
-                $this->commandAction($update);
-        }
-    }
-
-    protected function commandAction(UpdateObject $updateObject): void
-    {
-        $msg          = $updateObject->getMessage();
+        $msg          = $updateObj->getMessage();
         $senderChatId = $msg->chat->id;
 
-        $params = [
-            'chat_id' => $senderChatId,
-            'text' => $this->translator->trans(
-                'info.response',
-                ['%phone%' => $this->cfg->get('contacts.phone')],
-                'tg_commands'
-            ),
-            'parse_mode' => 'Markdown',
-            'disable_web_page_preview' => true,
-        ];
-        $this->sendMessage($params, true, $senderChatId);
+        $contactsPhone = $this->dynamicParamService->getValue('contacts.phone');
+
+        $text = BotService::escapeString($this->dynamicParamService->getValue('start.response'));
+        $text = str_replace('%phone%', $contactsPhone, $text);
+
+        $params = ['text' => $text, 'parse_mode' => 'MarkdownV2', 'disable_web_page_preview' => true,];
+        $this->bot->sendMessage($params, $senderChatId);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function buttonAction(UpdateObject $updateObj): void
+    {
     }
 }

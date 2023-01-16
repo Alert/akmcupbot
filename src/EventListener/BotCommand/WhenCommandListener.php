@@ -3,75 +3,79 @@ declare(strict_types=1);
 
 namespace App\EventListener\BotCommand;
 
-use App\Event\TgCallbackEvent;
+use App\Entity\EventEntity;
+use App\Event\TgCallbackQueryEvent;
+use App\Event\TgMessageEvent;
+use App\Service\BotService;
+use Carbon\Carbon;
+use DateTimeInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
-#[AsEventListener(event: 'tg.callback', method: 'handler')]
+#[AsEventListener(event: TgMessageEvent::class, method: 'commandHandler')]
+#[AsEventListener(event: TgCallbackQueryEvent::class, method: 'buttonHandler')]
 class WhenCommandListener extends AbstractCommandListener
 {
-    public const NAME = 'when';
-    public const ALIAS = 'когда';
+    public string $name = 'when';
+    public string $alias = 'когда';
 
-    public function handler(TgCallbackEvent $e): void
+    /**
+     * {@inheritdoc}
+     */
+    public function commandAction(UpdateObject $updateObj): void
     {
-        $update = $e->getUpdateObject();
-
-        if ($update->objectType() === 'message') {
-            $text = $update->getMessage()->text ?? '';
-            if (str_starts_with($text, '/' . self::NAME) || str_starts_with($text, '/' . self::ALIAS))
-                $this->commandAction($update);
-        }
-
-        if ($update->objectType() === 'callback_query') {
-            $this->btnAction($update);
-        }
-    }
-
-    protected function commandAction(UpdateObject $updateObject): void
-    {
-        $msg          = $updateObject->getMessage();
+        $msg          = $updateObj->getMessage();
         $senderChatId = $msg->chat->id;
 
+        $event = $this->doctrine->getRepository(EventEntity::class)->findOneUncompleted();
+
+        if (!$event) {
+            $text = $this->translator->trans('no_info', [], 'common');
+            $this->bot->sendMessage(['text' => $text], $senderChatId);
+            return;
+        }
+
+        $text = $this->translator->trans('when.response', [
+            'num' => $event->getNum(),
+            'readable_dates' => BotService::escapeString($event->getReadableDates()),
+            'days_count_down' => BotService::escapeString($this->getDaysCountDownText($event->getDateStart())),
+        ], 'common');
+
         $params = [
-            'chat_id' => $senderChatId,
-            'text' => $this->translator->trans('when.response', [], 'tg_commands'),
-            'parse_mode' => 'Markdown',
+            'text' => $text,
+            'parse_mode' => 'MarkdownV2',
             'disable_web_page_preview' => true,
             'reply_markup' => json_encode([
-                'inline_keyboard' => [[
-                    ['text' => 'Схема поля', 'callback_data' => 'when.field'],
-                    ['text' => 'Расписание', 'callback_data' => 'when.schedule'],
-                    ['text' => 'Заявка', 'url' => 'https://docs.google.com/forms/d/e/1FAIpQLSc3wgzDSgsTkGPwYPs1ZhWhifGUVSW0ID5d9LmeV19ZiYkQQA/viewform'],
-                ]],
-            ])];
+                'inline_keyboard' => [
+                    [[
+                        'text' => $this->translator->trans('when.btn.info.text', [], 'common'),
+                        'callback_data' => sprintf('s%de%d.info', $event->getSeason()->getId(), $event->getNum()),
+                    ]],
+                ],
+            ]),
+        ];
 
-        $this->sendMessage($params, false, $senderChatId);
+        $this->bot->sendMessage($params, $senderChatId);
     }
 
-    protected function btnAction(UpdateObject $updateObject)
+    /**
+     * {@inheritdoc}
+     */
+    public function buttonAction(UpdateObject $updateObj): void
     {
-        $callback = $updateObject->callbackQuery;
-
-        if ($callback->data === 'when.schedule') {
-            $this->sendMessage([
-                'chat_id' => $callback->message->chat->id,
-                'text' => 'информации ещё нет :(',
-            ]);
-            $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
-        }
-
-        if ($callback->data === 'when.field') {
-            $this->bot->sendMediaGroup([
-                'chat_id' => $callback->message->chat->id,
-                'media' => json_encode([
-                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAN4Y4j8zvkU36ikwl_DKaodymfwIEEAAlbEMRtVOUlIBrchlFbJztgBAAMCAANzAAMrBA'],
-                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAN5Y4j8zvHal_3u9WSv4dU1EkMV4eAAAlfEMRtVOUlIHecXVwcycLsBAAMCAANzAAMrBA'],
-                    ['type' => 'photo', 'media' => 'AgACAgIAAxkBAAN6Y4j8ztGotZcDBfcxpkfKlKv-LBEAAljEMRtVOUlIBWXOM4KaZ9UBAAMCAAN5AAMrBA'],
-                ]),
-            ]);
-            $this->bot->answerCallbackQuery(['callback_query_id' => $callback->id]);
-        }
     }
 
+    /**
+     * Get count down days text
+     *
+     * @param DateTimeInterface $date
+     *
+     * @return string
+     */
+    private function getDaysCountDownText(DateTimeInterface $date): string
+    {
+        $diffDays = $date < Carbon::now() ? 0 : Carbon::now()->diffInDays($date);
+
+        return $this->translator->trans('days_count_down', ['days' => $diffDays], 'common');
+    }
 }

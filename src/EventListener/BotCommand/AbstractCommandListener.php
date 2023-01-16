@@ -3,89 +3,138 @@ declare(strict_types=1);
 
 namespace App\EventListener\BotCommand;
 
-use App\Event\TgCallbackEvent;
-use Borsaco\TelegramBotApiBundle\Service\Bot;
-use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use App\Event\TgCallbackQueryEvent;
+use App\Event\TgMessageEvent;
+use App\Service\BotService;
+use App\Service\DynamicParamService;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Telegram\Bot\Api;
-use Telegram\Bot\Exceptions\TelegramSDKException;
-use Telegram\Bot\Objects\Message as MessageObject;
+use Telegram\Bot\Objects\Update as UpdateObject;
 
-abstract class AbstractCommandListener implements CommandListenerInterface
+abstract class AbstractCommandListener implements CommandListenerInterface, ButtonListenerInterface
 {
-    protected Api $bot;
-    protected TranslatorInterface $translator;
-    protected ContainerBagInterface $cfg;
-    protected bool $isDevMode;
-    protected int $devChatId;
-
-    public function __construct(Bot $bot, TranslatorInterface $translator, ContainerBagInterface $cfg)
-    {
-        $this->bot = $bot->getBot();
-        $this->translator = $translator;
-        $this->cfg = $cfg;
-        $this->isDevMode = $cfg->get('tg.dev_mode');
-        $this->devChatId = $cfg->get('tg.dev_chat_id');
-    }
-
-//    /**
-//     * Check message data is a command
-//     *
-//     * @param TgCallbackEvent $e
-//     * @return bool
-//     */
-//    protected function isCommand(TgCallbackEvent $e): bool
-//    {
-//        $entities = $e->getMessage()['entities'] ?? [];
-//        $firstEntity = array_shift($entities);
-//        $type = $firstEntity['type'] ?? '';
-//
-//        return $type === 'bot_command';
-//    }
-//
-//    /**
-//     * Match command name for different listener
-//     *
-//     * @param TgCallbackEvent $e
-//     * @return bool
-//     */
-//    protected function commandNameMatching(TgCallbackEvent $e): bool
-//    {
-//        return $e->getCommand() === static::NAME;
-//    }
-//
-//    public function handler(TgCallbackEvent $e): void
-//    {
-//        if (!$this->isCommand($e) || !$this->commandNameMatching($e)) return;
-//
-//        $this->action($e);
-//    }
+    const BUTTONS_PER_ROW = 2;
 
     /**
-     * Send message wrapper
+     * Command name
      *
-     * @param array $params
-     * @param bool $force Ignore dev mode if true
-     * @param int|null $senderChatId For check dev chat id
-     * @return MessageObject
-     * @throws TelegramSDKException
+     * @var string
      */
-    protected function sendMessage(array $params, bool $force = false, ?int $senderChatId = null): MessageObject
+    public string $name;
+
+    /**
+     * Command alias
+     *
+     * @var string
+     */
+    public string $alias;
+
+    /**
+     * Bot wrapper
+     *
+     * @var BotService
+     */
+    protected BotService $bot;
+
+    /**
+     * Translator
+     *
+     * @var TranslatorInterface
+     */
+    protected TranslatorInterface $translator;
+
+    /**
+     * Doctrine
+     *
+     * @var ManagerRegistry
+     */
+    protected ManagerRegistry $doctrine;
+
+    /**
+     * Dynamic param service
+     *
+     * @var DynamicParamService
+     */
+    protected DynamicParamService $dynamicParamService;
+
+    public function __construct(BotService          $bot,
+                                TranslatorInterface $translator,
+                                ManagerRegistry     $doctrine,
+                                DynamicParamService $dynamicParamService)
     {
-        if ($this->isDevMode && !$force) {
-            $message = $this->bot->sendMessage([
-                'chat_id' => $params['chat_id'],
-                'text' => "бот ненадолго отошёл, попробуйте чуть позже", // todo: move to translations
-            ]);
+        $this->bot                 = $bot;
+        $this->translator          = $translator;
+        $this->doctrine            = $doctrine;
+        $this->dynamicParamService = $dynamicParamService;
+    }
 
-            if ($senderChatId === $this->devChatId) {
-                $message = $this->bot->sendMessage($params);
-            }
+    /**
+     * {@inheritdoc}
+     */
+    public function commandHandler(TgMessageEvent $event): void
+    {
+        $updateObj = $event->getUpdateObject();
 
-            return $message;
+        if ($this->isCommand($updateObj) && $this->commandNameMatching($updateObj)) {
+            $this->commandAction($updateObj);
         }
+    }
 
-        return $this->bot->sendMessage($params);
+    /**
+     * {@inheritdoc}
+     */
+    public function buttonHandler(TgCallbackQueryEvent $event): void
+    {
+        $this->buttonAction($event->getUpdateObject());
+    }
+
+    /**
+     * Command action
+     *
+     * @param UpdateObject $updateObj
+     *
+     * @return void
+     */
+    abstract public function commandAction(UpdateObject $updateObj): void;
+
+    /**
+     * Button action
+     *
+     * @param UpdateObject $updateObj
+     *
+     * @return void
+     */
+    abstract public function buttonAction(UpdateObject $updateObj): void;
+
+    /**
+     * Check message data is a command
+     *
+     * @param UpdateObject $updateObject
+     *
+     * @return bool
+     */
+    private function isCommand(UpdateObject $updateObject): bool
+    {
+        $text = $updateObject->getMessage()?->text;
+
+        return $text !== null && str_starts_with($text, '/');
+    }
+
+    /**
+     * Match command name for different listener
+     *
+     * @param UpdateObject $updateObject
+     *
+     * @return bool
+     */
+    private function commandNameMatching(UpdateObject $updateObject): bool
+    {
+        $text         = trim($updateObject->getMessage()->text);
+        $delimiterPos = strpos($text, ' ');
+
+        $cmdName = substr($text, 1, $delimiterPos !== false ? $delimiterPos : null);
+
+        return $cmdName === $this->name || $cmdName === $this->alias;
     }
 
 }

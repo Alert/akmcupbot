@@ -1,43 +1,79 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Controller;
 
 
-use App\Event\TgCallbackEvent;
-use Borsaco\TelegramBotApiBundle\Service\Bot;
-use Psr\Log\LoggerInterface;
+use App\Event\TgEventFactory;
+use App\Service\BotService;
+use App\Service\LoggerService;
+use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Telegram\Bot\Api;
 
 #[Route('/bot', name: 'bot.')]
 class BotController extends AbstractController
 {
-    private Api $bot;
-    private LoggerInterface $botLogger;
+    /**
+     * Bot service
+     *
+     * @var BotService
+     */
+    private BotService $bot;
+
+    /**
+     * Event dispatcher
+     *
+     * @var EventDispatcherInterface
+     */
     private EventDispatcherInterface $dispatcher;
 
-    public function __construct(Bot $bot, LoggerInterface $botLogger, EventDispatcherInterface $dispatcher)
+    /**
+     * Logger service
+     *
+     * @var LoggerService
+     */
+    private LoggerService $logger;
+
+    /**
+     * Constructor
+     *
+     * @param BotService               $bot
+     * @param EventDispatcherInterface $dispatcher
+     * @param LoggerService            $logger
+     */
+    public function __construct(BotService               $bot,
+                                EventDispatcherInterface $dispatcher,
+                                LoggerService            $logger)
     {
-        $this->bot        = $bot->getBot();
-        $this->botLogger  = $botLogger;
+        $this->bot        = $bot;
         $this->dispatcher = $dispatcher;
+        $this->logger     = $logger;
     }
 
     /**
      * Get income data from Telegram by webhook
+     *
+     * @return Response
      */
     #[Route('/callback/', name: 'callback')]
     public function callback(): Response
     {
-        $data = $this->bot->getWebhookUpdate();
+        $updateObj = $this->bot->getWebhookUpdate();
+        $this->logger->logWebhookData($updateObj);
 
-        $this->botLogger->info('Webhook receive data', compact('data'));
+        if (!$this->bot->hasMessageSendDate($updateObj) || $this->bot->isMessageTimedOut($updateObj)) {
+            $this->logger->getBotLogger()->warning('Incoming data don\'t have date or timed out');
+        }
 
-        $event = new TgCallbackEvent($data);
-        $this->dispatcher->dispatch($event, TgCallbackEvent::NAME);
+        try {
+            $event = (new TgEventFactory())->create($updateObj);
+            $this->dispatcher->dispatch($event, $event::class);
+        } catch (LogicException $e) {
+            $this->logger->getBotLogger()->warning($e->getMessage());
+        }
 
         return new Response();
     }
