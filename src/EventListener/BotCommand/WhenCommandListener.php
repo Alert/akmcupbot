@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\EventListener\BotCommand;
 
+use App\Entity\EventEntity;
 use App\Event\TgCallbackQueryEvent;
 use App\Event\TgMessageEvent;
 use App\Service\BotService;
@@ -26,7 +27,7 @@ class WhenCommandListener extends AbstractCommandListener
         $msg          = $updateObj->getMessage();
         $senderChatId = $msg->chat->id;
 
-        $event = $this->eventRepo->findOneUncompleted();
+        $event = $this->doctrine->getRepository(EventEntity::class)->findOneUncompleted();
 
         if (!$event) {
             $text = $this->translator->trans('no_info', [], 'common');

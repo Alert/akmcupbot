@@ -5,6 +5,7 @@ namespace App\EventListener\BotCommand;
 
 use App\Event\TgCallbackQueryEvent;
 use App\Event\TgMessageEvent;
+use App\Service\BotService;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
@@ -25,7 +26,7 @@ class InfoCommandListener extends AbstractCommandListener
 
         $contactsPhone = $this->dynamicParamService->getValue('contacts.phone');
 
-        $text = $this->dynamicParamService->getValue('start.response');
+        $text = BotService::escapeString($this->dynamicParamService->getValue('start.response'));
         $text = str_replace('%phone%', $contactsPhone, $text);
 
         $params = ['text' => $text, 'parse_mode' => 'MarkdownV2', 'disable_web_page_preview' => true,];

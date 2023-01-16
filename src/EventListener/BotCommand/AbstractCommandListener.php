@@ -115,7 +115,9 @@ abstract class AbstractCommandListener implements CommandListenerInterface, Butt
      */
     private function isCommand(UpdateObject $updateObject): bool
     {
-        return str_starts_with($updateObject->getMessage()?->text, '/');
+        $text = $updateObject->getMessage()?->text;
+
+        return $text !== null && str_starts_with($text, '/');
     }
 
     /**

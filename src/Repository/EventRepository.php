@@ -78,6 +78,7 @@ class EventRepository extends ServiceEntityRepository
         $qb->andWhere('e.season = :seasonNum')->setParameter('seasonNum', $seasonNum);
         $qb->andWhere('e.num = :eventNum')->setParameter('eventNum', $eventNum);
         $qb->leftJoin('e.details', 'ed');
+        $qb->orderBy('ed.sort');
         $qb->setMaxResults(1);
         $query = $qb->getQuery();
 

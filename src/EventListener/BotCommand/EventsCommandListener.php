@@ -97,10 +97,12 @@ class EventsCommandListener extends AbstractCommandListener
         $rows       = $row = [];
         $countInRow = 0;
         foreach ($event->getDetails() as $detail) {
-            $btn   = [
-                'text' => $detail->getBtnText(),
-                'callback_data' => sprintf('s%de%d.%s', $season->getId(), $event->getNum(), $detail->getBtnAction()),
-            ];
+            if ($detail->getType() === EventDetailEntity::TYPE_LINK) {
+                $btn = ['text' => $detail->getBtnText(), 'url' => $detail->getValue()];
+            } else {
+                $btnCallbackData = sprintf('s%de%d.%s', $season->getId(), $event->getNum(), $detail->getBtnAction());
+                $btn             = ['text' => $detail->getBtnText(), 'callback_data' => $btnCallbackData];
+            }
             $row[] = $btn;
 
             if (++$countInRow === self::BUTTONS_PER_ROW) {
