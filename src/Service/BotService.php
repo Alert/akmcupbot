@@ -26,6 +26,11 @@ class BotService
     public const ESCAPE_CHAR_EXCLUSION = ['*', '_', '~'];
 
     /**
+     * @var string
+     */
+    public readonly string $name;
+
+    /**
      * Api object
      *
      * @var Api
@@ -58,15 +63,27 @@ class BotService
      *
      * @throws TelegramSDKException
      */
-    public function __construct(string              $token,
+    public function __construct(string              $name,
+                                string              $token,
                                 bool                $isDevMode,
                                 int                 $devChatId,
                                 TranslatorInterface $translator)
     {
         $this->api        = new Api($token);
+        $this->name       = $name;
         $this->isDevMode  = $isDevMode;
         $this->devChatId  = $devChatId;
         $this->translator = $translator;
+    }
+
+    /**
+     * Get bot name
+     *
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
     }
 
     /**
