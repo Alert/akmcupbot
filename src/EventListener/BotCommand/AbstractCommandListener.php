@@ -133,6 +133,7 @@ abstract class AbstractCommandListener implements CommandListenerInterface, Butt
         $delimiterPos = strpos($text, ' ');
 
         $cmdName = substr($text, 1, $delimiterPos !== false ? $delimiterPos : null);
+        $cmdName = str_ireplace('@' . $this->bot->getName(), '', $cmdName);
 
         return $cmdName === $this->name || $cmdName === $this->alias;
     }

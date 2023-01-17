@@ -25,6 +25,7 @@ services:
     # please note that last definitions always *replace* previous ones
     App\Service\BotService:
         arguments:
+            $name: '%env(string:TG_BOT_NAME)%'
             $token: '%env(string:TG_BOT_ACCESS_TOKEN)%'
             $isDevMode: '%env(bool:TG_BOT_DEV_MODE)%'
             $devChatId: '%env(bool:TG_DEV_CHAT_ID)%'
