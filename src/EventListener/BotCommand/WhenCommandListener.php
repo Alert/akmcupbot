@@ -74,7 +74,8 @@ class WhenCommandListener extends AbstractCommandListener
      */
     private function getDaysCountDownText(DateTimeInterface $date): string
     {
-        $diffDays = $date < Carbon::now() ? 0 : Carbon::now()->diffInDays($date);
+        $today    = Carbon::now()->setTime(0, 0, 0);
+        $diffDays = $date < $today ? 0 : $today->diffInDays($date);
 
         return $this->translator->trans('days_count_down', ['days' => $diffDays], 'common');
     }
