@@ -10,3 +10,6 @@
 ###< symfony/framework-bundle ###
 
 /.idea
+/htdocs/data/
+/htdocs/test*
+/htdocs/logs*
