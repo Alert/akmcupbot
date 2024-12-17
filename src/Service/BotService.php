@@ -168,7 +168,7 @@ class BotService
      */
     public function hasMessageSendDate(UpdateObject $data): bool
     {
-        return (bool)$data->getMessage()?->date;
+        return isset($data->getMessage()?->date);
     }
 
     /**
