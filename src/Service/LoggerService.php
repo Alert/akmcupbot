@@ -58,6 +58,12 @@ class LoggerService
         $this->getBotLogger()->info('Webhook receive data', compact('data'));
 
         $message   = $data->getMessage();
+
+        if (!isset($message->from)) {
+            $this->getBotLogger()->warning('Message don\'t have `message` field', compact('message'));
+            return;
+        }
+
         $username  = $message->from?->username;
         $firstName = $message->from?->firstName;
         $lastName  = $message->from?->lastName;
